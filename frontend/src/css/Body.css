@@ -1,0 +1,45 @@
+.body-container {
+    width: 100%;
+    min-height: 100vh;
+    background: radial-gradient(circle, rgba(50, 10, 70, 0.8) 0%, rgba(10, 0, 20, 1) 80%);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .background-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  
+  @keyframes neonGlow {
+    0% {
+      box-shadow: 0 0 15px rgba(255, 0, 255, 0.4), 0 0 30px rgba(255, 0, 255, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 35px rgba(255, 50, 255, 0.8), 0 0 70px rgba(255, 0, 255, 0.7);
+    }
+    100% {
+      box-shadow: 0 0 15px rgba(255, 0, 255, 0.4), 0 0 30px rgba(255, 0, 255, 0.3);
+    }
+  }
+  
+  .content {
+    width: 80%;
+    max-width: 1200px;
+    min-height: 100vh;
+    background: rgba(40, 10, 60, 0.9);
+    padding: 30px;
+    position: relative;
+    z-index: 1;
+    
+    border: none;
+    animation: neonGlow 3s infinite alternate ease-in-out;
+  }
+  

@@ -1,0 +1,48 @@
+.neon-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(50, 10, 70, 0.8) 0%, rgba(10, 0, 20, 1) 80%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loader-ring {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid transparent;
+  border-top-color: rgba(255, 0, 255, 0.8);
+  animation: spin 1.5s linear infinite;
+}
+
+.loader-ring:nth-child(2) {
+  width: 100px;
+  height: 100px;
+  border-top-color: rgba(0, 255, 255, 0.8);
+  animation-delay: 0.2s;
+}
+
+.loader-ring:nth-child(3) {
+  width: 120px;
+  height: 120px;
+  border-top-color: rgba(255, 255, 0, 0.8);
+  animation-delay: 0.4s;
+}
+
+.loader-ring:nth-child(4) {
+  width: 140px;
+  height: 140px;
+  border-top-color: rgba(0, 255, 0, 0.8);
+  animation-delay: 0.6s;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
