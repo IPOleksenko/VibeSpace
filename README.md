@@ -10,7 +10,7 @@
 ## 📌 Setup Instructions
 
 ### 🔧 Fill Environment Files
-Ensure all required environment files are present in `backend/env/` before proceeding.
+Ensure that all required environment variables are present in both `backend/.env` and `frontend/.env` files before proceeding.
 
 ### 📦 Install Dependencies
 To install all necessary dependencies in a virtual environment, run:
