@@ -1,0 +1,197 @@
+.auth-container {
+    width: 90%;
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    text-align: center;
+    background: rgba(30, 10, 40, 0.95);
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.8);
+    border-radius: 10px;
+    font-family: "Orbitron", sans-serif;
+    box-sizing: border-box;
+  }
+  
+  h2 {
+    color: #ff00ff;
+    text-shadow: 0 0 15px rgba(255, 0, 255, 1), 0 0 30px rgba(200, 0, 200, 0.9);
+  }
+  
+  .input-group {
+    position: relative;
+    margin: 10px 0;
+  }
+  
+  input {
+    width: calc(100% - 24px);
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+    transition: 0.3s;
+    background: rgba(20, 10, 30, 0.8);
+    color: white;
+    box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+  }
+  
+  input:focus {
+    box-shadow: 0 0 15px rgba(255, 0, 255, 1);
+    background: rgba(30, 10, 50, 0.9);
+  }
+  
+  .neon-button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 5px;
+    background: #ff00ff;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    text-transform: uppercase;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.8);
+  }
+  
+  .neon-button:hover {
+    background: #cc00cc;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 1);
+  }
+  
+  .register {
+    background: #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+  }
+  
+  .register:hover {
+    background: #00cccc;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 1);
+  }
+  
+  @media (max-width: 480px) {
+    .auth-container {
+      padding: 15px;
+    }
+  
+    input {
+      font-size: 14px;
+      padding: 10px;
+    }
+  
+    .neon-button {
+      font-size: 14px;
+      padding: 10px;
+    }
+  }
+  .input-group {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+  
+  .input-group input {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transition: background 0.3s ease-in-out;
+  }
+
+  .input-group.focused input {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  .toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 18px;
+    color: white;
+    user-select: none;
+  }
+  
+  .toggle-password:hover {
+    color: #fff;
+  }
+  
+  .phone-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .country-selector {
+    padding: 10px;
+    background: rgba(20, 10, 30, 0.8);
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    min-width: 60px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+    font-size: 14px;
+  }
+  
+  .country-selector:hover {
+    background: rgba(30, 10, 50, 0.9);
+    box-shadow: 0 0 15px rgba(255, 0, 255, 1);
+  }
+  
+
+  .phone-group {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .phone-group input {
+    flex-grow: 1;
+    padding-left: 50px;
+    border-radius: 5px;
+  }
+  
+  .country-code {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    outline: none;
+  }
+  
+  .dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 150px;
+    overflow-y: auto;
+    background: rgba(30, 10, 40, 0.95);
+    box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+    border-radius: 5px;
+    z-index: 1000;
+  }
+  
+  .dropdown-item {
+    padding: 8px;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  
