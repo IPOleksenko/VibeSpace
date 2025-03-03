@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/AuthForm.css";
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const AuthForm = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -94,7 +96,7 @@ const AuthForm = () => {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/users/", {
+      const response = await fetch(`${API_URL}/api/users/`, {
         method: "POST",
         body: dataToSend,
       });
