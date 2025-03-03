@@ -12,8 +12,8 @@ const AuthForm = () => {
   const [selectedCountry, setSelectedCountry] = useState({ name: "United States", code: "+1" });
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
     username: "",
+    email: "",
     password: "",
     confirmPassword: "",
     phone: "",
@@ -86,37 +86,41 @@ const AuthForm = () => {
 
   const handleSignUp = async () => {
     const dataToSend = new FormData();
-    dataToSend.append("email", formData.email);
+
     dataToSend.append("username", formData.username);
+    dataToSend.append("email", formData.email);
     dataToSend.append("password", formData.password);
-    dataToSend.append("confirmPassword", formData.confirmPassword);
+    dataToSend.append("confirm_password", formData.confirmPassword);
     dataToSend.append("phone", selectedCountry.code + formData.phone);
     if (formData.avatar) {
       dataToSend.append("avatar", formData.avatar);
     }
 
     try {
-      const response = await fetch(`${API_URL}/api/users/`, {
+      const response = await fetch(`${API_URL}/api/register/`, {
         method: "POST",
         body: dataToSend,
       });
+
       const data = await response.json();
+
       if (response.ok) {
         console.log("Registration successful:", data);
         navigate("/");
       } else {
         console.error("Registration error:", data);
-        setRegError(data.error || data.message || "Registration failed. Please try again.");
+        setRegError(data.errors);
       }
     } catch (error) {
       console.error("Error during registration API call:", error);
-      setRegError("Error during registration API call.");
+      setRegError({ general: "Error during registration API call." });
     }
   };
 
   // Login function sends JSON (no file transmission required)
   const handleLogIn = async () => {
-    console.log("Logging...");
+    // Now using Login and Password for authentication
+    console.log("Logging in with:", formData.username, formData.password);
   };
 
   const handleSubmit = (e) => {
@@ -138,28 +142,33 @@ const AuthForm = () => {
   return (
     <div className="auth-container">
       <h2>{isRegistering ? "Register" : "Login"}</h2>
-      {regError && <div className="error-message">{regError}</div>}
+      {regError &&
+        Object.entries(regError).map(([key, message]) => (
+          <div key={key} className="error-message">
+            {message}
+          </div>
+        ))}
+
       <form onSubmit={handleSubmit}>
-        {/* Email Field */}
+        {/* Login Field (previously Email) */}
         <div className="input-group">
           <input
-            type="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            type="text"
+            placeholder="Login"
+            value={formData.username}
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
             required
           />
         </div>
-        {/* Registration-only Fields */}
+        {/* Registration-only Field */}
         {isRegistering && (
           <>
-            {/* Username Field */}
             <div className="input-group">
               <input
-                type="text"
-                placeholder="Username"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                type="email"
+                placeholder="Gmail"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
               />
             </div>
@@ -194,7 +203,10 @@ const AuthForm = () => {
               </span>
             </div>
             {/* Phone Number Field */}
-            <div className="input-group phone-group" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div
+              className="input-group phone-group"
+              style={{ display: "flex", alignItems: "center", gap: "10px" }}
+            >
               <button
                 type="button"
                 className="country-code"
@@ -228,12 +240,7 @@ const AuthForm = () => {
             {/* Avatar Upload Field */}
             <div className="avatar-upload input-group">
               <label htmlFor="avatarUpload">Upload Avatar</label>
-              <input
-                id="avatarUpload"
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-              />
+              <input id="avatarUpload" type="file" accept="image/*" onChange={handleAvatarChange} />
               {avatarError && <div className="error-message">{avatarError}</div>}
             </div>
             {avatarPreview && (

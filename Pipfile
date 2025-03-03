@@ -7,10 +7,11 @@ name = "pypi"
 django = "*"
 dotenv = "*"
 psycopg2 = "*"
-nodeenv = "*"
 social-auth-app-django = "*"
 djangorestframework = "*"
 django-cors-headers = "*"
+pillow = "*"
+nodeenv = "*"
 
 [dev-packages]
 
