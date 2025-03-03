@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import "../css/AuthForm.css";
 
 const AuthForm = () => {
@@ -18,8 +19,11 @@ const AuthForm = () => {
   });
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [avatarError, setAvatarError] = useState("");
+  const [regError, setRegError] = useState("");
   const countryCodeRef = useRef(null);
   const [paddingLeft, setPaddingLeft] = useState(50);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("https://restcountries.com/v3.1/all")
@@ -78,12 +82,50 @@ const AuthForm = () => {
     }
   };
 
+  const handleSignUp = async () => {
+    const dataToSend = new FormData();
+    dataToSend.append("email", formData.email);
+    dataToSend.append("username", formData.username);
+    dataToSend.append("password", formData.password);
+    dataToSend.append("confirmPassword", formData.confirmPassword);
+    dataToSend.append("phone", selectedCountry.code + formData.phone);
+    if (formData.avatar) {
+      dataToSend.append("avatar", formData.avatar);
+    }
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/users/", {
+        method: "POST",
+        body: dataToSend,
+      });
+      const data = await response.json();
+      if (response.ok) {
+        console.log("Registration successful:", data);
+        navigate("/");
+      } else {
+        console.error("Registration error:", data);
+        setRegError(data.error || data.message || "Registration failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error during registration API call:", error);
+      setRegError("Error during registration API call.");
+    }
+  };
+
+  // Login function sends JSON (no file transmission required)
+  const handleLogIn = async () => {
+    console.log("Logging...");
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(isRegistering ? "Registering:" : "Logging in:", {
-      ...formData,
-      phone: selectedCountry.code + formData.phone,
-    });
+    setRegError(""); // clearing error message before sending
+    // Depending on the mode, call registration or login
+    if (isRegistering) {
+      handleSignUp();
+    } else {
+      handleLogIn();
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -91,19 +133,10 @@ const AuthForm = () => {
     // Google login (OAuth) handling goes here
   };
 
-  const handleSignUp = () => {
-    console.log("Registration");
-    // Registration logic goes here
-  };
-
-  const handleLogIn = () => {
-    console.log("Login");
-    // Login logic goes here
-  };
-
   return (
     <div className="auth-container">
       <h2>{isRegistering ? "Register" : "Login"}</h2>
+      {regError && <div className="error-message">{regError}</div>}
       <form onSubmit={handleSubmit}>
         {/* Email Field */}
         <div className="input-group">
@@ -217,14 +250,9 @@ const AuthForm = () => {
             )}
           </>
         )}
-        <button
-          type="submit"
-          className="neon-button"
-          onClick={isRegistering ? handleSignUp : handleLogIn}
-        >
+        <button type="submit" className="neon-button">
           {isRegistering ? "Sign Up" : "Log In"}
         </button>
-
         {!isRegistering && (
           <button type="button" className="neon-button google" onClick={handleGoogleLogin}>
             Sign in with Google
