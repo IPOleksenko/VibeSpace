@@ -10,10 +10,14 @@ const AuthForm = () => {
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
+    username: "",
     password: "",
     confirmPassword: "",
     phone: "",
+    avatar: null,
   });
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [avatarError, setAvatarError] = useState("");
   const countryCodeRef = useRef(null);
   const [paddingLeft, setPaddingLeft] = useState(50);
 
@@ -40,6 +44,17 @@ const AuthForm = () => {
     }
   }, [selectedCountry]);
 
+  // Create avatar preview when a file is selected
+  useEffect(() => {
+    if (formData.avatar) {
+      const objectUrl = URL.createObjectURL(formData.avatar);
+      setAvatarPreview(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    } else {
+      setAvatarPreview(null);
+    }
+  }, [formData.avatar]);
+
   const handlePhoneChange = (e) => {
     setFormData({ ...formData, phone: e.target.value.replace(/\D/g, "") });
   };
@@ -47,6 +62,20 @@ const AuthForm = () => {
   const handleCountrySelect = (country) => {
     setSelectedCountry(country);
     setShowCountryDropdown(false);
+  };
+
+  // Custom handler to allow only image files
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.type.startsWith("image/")) {
+        setFormData({ ...formData, avatar: file });
+        setAvatarError("");
+      } else {
+        setAvatarError("Invalid file format. Please upload an image.");
+        setFormData({ ...formData, avatar: null });
+      }
+    }
   };
 
   const handleSubmit = (e) => {
@@ -59,23 +88,24 @@ const AuthForm = () => {
 
   const handleGoogleLogin = () => {
     console.log("Logging in with Google...");
-    // Here will be the handling of Google login (OAuth)
+    // Google login (OAuth) handling goes here
   };
 
   const handleSignUp = () => {
     console.log("Registration");
-    // Add logic for registration
+    // Registration logic goes here
   };
 
   const handleLogIn = () => {
     console.log("Login");
-    // Add logic for login
+    // Login logic goes here
   };
 
   return (
     <div className="auth-container">
       <h2>{isRegistering ? "Register" : "Login"}</h2>
       <form onSubmit={handleSubmit}>
+        {/* Email Field */}
         <div className="input-group">
           <input
             type="email"
@@ -85,6 +115,22 @@ const AuthForm = () => {
             required
           />
         </div>
+        {/* Registration-only Fields */}
+        {isRegistering && (
+          <>
+            {/* Username Field */}
+            <div className="input-group">
+              <input
+                type="text"
+                placeholder="Username"
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                required
+              />
+            </div>
+          </>
+        )}
+        {/* Password Field */}
         <div className="input-group">
           <input
             type={showPassword ? "text" : "password"}
@@ -99,6 +145,7 @@ const AuthForm = () => {
         </div>
         {isRegistering && (
           <>
+            {/* Confirm Password Field */}
             <div className="input-group">
               <input
                 type={showConfirmPassword ? "text" : "password"}
@@ -111,10 +158,8 @@ const AuthForm = () => {
                 {showConfirmPassword ? "🔓" : "🔒"}
               </span>
             </div>
-            <div
-              className="input-group phone-group"
-              style={{ display: "flex", alignItems: "center", gap: "10px" }}
-            >
+            {/* Phone Number Field */}
+            <div className="input-group phone-group" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <button
                 type="button"
                 className="country-code"
@@ -145,6 +190,31 @@ const AuthForm = () => {
                 style={{ flex: "1", paddingLeft: `${paddingLeft}px` }}
               />
             </div>
+            {/* Avatar Upload Field */}
+            <div className="avatar-upload input-group">
+              <label htmlFor="avatarUpload">Upload Avatar</label>
+              <input
+                id="avatarUpload"
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+              />
+              {avatarError && <div className="error-message">{avatarError}</div>}
+            </div>
+            {avatarPreview && (
+              <div className="avatar-preview">
+                <img
+                  src={avatarPreview}
+                  alt="Avatar Preview"
+                  style={{
+                    width: "100px",
+                    height: "100px",
+                    objectFit: "cover",
+                    borderRadius: "50%",
+                  }}
+                />
+              </div>
+            )}
           </>
         )}
         <button
