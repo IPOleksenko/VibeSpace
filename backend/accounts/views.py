@@ -23,11 +23,13 @@ class LoginView(APIView):
         username = request.data.get("username")
         password = request.data.get("password")
 
-        print(f"Received login attempt: username={username}, password={password}")
-
         try:
             user = UserProfile.objects.get(username=username)
             print(f"User found: {user}")
+
+            if not user.is_active:
+                print("User is inactive!")
+                return Response({"error": "Your account is inactive. Please contact support."}, status=status.HTTP_403_FORBIDDEN)
 
             if user.check_password(password):
                 token, created = Token.objects.get_or_create(user=user)
@@ -54,3 +56,4 @@ class UserProfileView(APIView):
             "phone_number": user.phone_number,
             "avatar_base64": user.avatar_base64
         })
+    
