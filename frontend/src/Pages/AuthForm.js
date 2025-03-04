@@ -116,11 +116,35 @@ const AuthForm = () => {
   };
   
 
-  // Login function sends JSON (no file transmission required)
   const handleLogIn = async () => {
-    // Now using Login and Password for authentication
     console.log("Logging in with:", formData.username, formData.password);
+  
+    try {
+      const response = await fetch(`${API_URL}/api/login/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        console.log("Login successful:", data);
+        localStorage.setItem("token", data.token);
+        navigate("/");
+      } else {
+        console.error("Login failed:", data);
+        setRegError(data);
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      setRegError({ error: "Something went wrong. Please try again." });
+    }
   };
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
