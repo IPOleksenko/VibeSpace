@@ -89,7 +89,9 @@ const AuthForm = () => {
     formDataToSend.append("username", formData.username);
     formDataToSend.append("email", formData.email);
     formDataToSend.append("password", formData.password);
+    formDataToSend.append("confirm_password", formData.confirmPassword);
     formDataToSend.append("phone_number", `${selectedCountry.code}${formData.phone}`);
+    
     if (formData.avatar) {
       formDataToSend.append("avatar", formData.avatar);
     }
@@ -113,8 +115,7 @@ const AuthForm = () => {
       console.error("Error during registration:", error);
       setRegError({ error: "Something went wrong. Please try again." });
     }
-  };
-  
+}; 
 
   const handleLogIn = async () => {
     console.log("Logging in with:", formData.username, formData.password);
