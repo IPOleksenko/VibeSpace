@@ -85,37 +85,36 @@ const AuthForm = () => {
   };
 
   const handleSignUp = async () => {
-    const dataToSend = new FormData();
-
-    dataToSend.append("username", formData.username);
-    dataToSend.append("email", formData.email);
-    dataToSend.append("password", formData.password);
-    dataToSend.append("confirm_password", formData.confirmPassword);
-    dataToSend.append("phone", selectedCountry.code + formData.phone);
+    const formDataToSend = new FormData();
+    formDataToSend.append("username", formData.username);
+    formDataToSend.append("email", formData.email);
+    formDataToSend.append("password", formData.password);
+    formDataToSend.append("phone_number", `${selectedCountry.code}${formData.phone}`);
     if (formData.avatar) {
-      dataToSend.append("avatar", formData.avatar);
+      formDataToSend.append("avatar", formData.avatar);
     }
-
+  
     try {
       const response = await fetch(`${API_URL}/api/register/`, {
         method: "POST",
-        body: dataToSend,
+        body: formDataToSend,
       });
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
         console.log("Registration successful:", data);
         navigate("/");
       } else {
-        console.error("Registration error:", data);
-        setRegError(data.errors);
+        console.error("Registration failed:", data);
+        setRegError(data);
       }
     } catch (error) {
-      console.error("Error during registration API call:", error);
-      setRegError({ general: "Error during registration API call." });
+      console.error("Error during registration:", error);
+      setRegError({ error: "Something went wrong. Please try again." });
     }
   };
+  
 
   // Login function sends JSON (no file transmission required)
   const handleLogIn = async () => {
