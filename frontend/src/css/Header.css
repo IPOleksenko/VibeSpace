@@ -1,113 +1,249 @@
+/* 🌙 DARK MODE */
+body.dark .body-container {
+    background: radial-gradient(circle, #100018 0%, #05000c 100%);
+    color: #ffccff;
+    transition: background 0.5s ease-in-out, color 0.3s ease-in-out;
+}
+
+.header.dark {
+    background: linear-gradient(90deg, #300040 0%, #200030 100%);
+    box-shadow: 0 0 30px #ff00ff, 0 0 50px #c800c8;
+    border-bottom: 3px solid #ff00ff;
+    animation: neon-pulse 1.5s infinite alternate;
+}
+
+/* ☀️ LIGHT MODE */
+body.light {
+    background: radial-gradient(circle, #ffffff 0%, #e6e6fa 100%);
+    color: #222;
+    transition: background 0.5s ease-in-out, color 0.3s ease-in-out;
+}
+
+.header.light {
+    background: linear-gradient(90deg, #d9e4ff 0%, #f0f0fa 100%);
+    box-shadow: 0 0 30px #3a80ff, 0 0 50px #0050ff;
+    border-bottom: 3px solid #3a80ff;
+}
+
+/* 🏠 HEADER */
 .header {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    background: rgba(30, 10, 40, 0.95);
-    backdrop-filter: blur(20px);
     padding: 15px 5%;
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: transform 0.3s ease-out, background 0.3s ease-in-out;
-    box-shadow: 0 0 30px rgba(255, 0, 255, 1), 0 0 50px rgba(200, 0, 200, 0.9);
-    border-bottom: 3px solid rgba(255, 0, 255, 0.7);
+    transition: transform 0.3s ease-out, background 0.5s ease-in-out;
     z-index: 1000;
-    animation: neon-flicker 2s infinite alternate;
-  }
-  
-  @media (max-width: 768px) {
-    .header {
-      padding: 10px 5%;
-    }
-    .logo {
-      font-size: 24px;
-    }
-    .logo-icon {
-      width: 50px;
-      height: 50px;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .header {
-      padding: 8px 3%;
-    }
-    .logo {
-      font-size: 20px;
-      letter-spacing: 2px;
-    }
-    .logo-icon {
-      width: 40px;
-      height: 40px;
-    }
-  }
-  
-  @keyframes neon-flicker {
-    0% { box-shadow: 0 0 30px rgba(255, 0, 255, 1), 0 0 50px rgba(200, 0, 200, 0.9); }
-    50% { box-shadow: 0 0 40px rgba(255, 0, 255, 0.8), 0 0 60px rgba(200, 0, 200, 0.7); }
-    100% { box-shadow: 0 0 35px rgba(255, 0, 255, 1), 0 0 55px rgba(200, 0, 200, 0.9); }
-  }
-  
-  .header-content {
+}
+
+.header-content {
     display: flex;
     align-items: center;
-    gap: 20px;
-  }
-  
-  .logo-icon {
+    width: 100%;
+    gap: 50;
+    padding: 0 10%;
+    justify-content: space-between;
+}
+
+.logo-icon {
     width: 60px;
     height: 60px;
     transition: transform 0.3s ease-in-out;
-    filter: drop-shadow(0 0 15px rgba(255, 0, 255, 1)) drop-shadow(0 0 25px rgba(200, 0, 200, 0.9));
-    animation: pulse 2s infinite alternate;
-  }
-  
-  @keyframes pulse {
-    0% { transform: scale(1); }
-    100% { transform: scale(1.1); }
-  }
-  
-  .logo {
+}
+
+.logo {
     font-size: 28px;
     font-weight: bold;
-    color: #ff00ff;
     text-transform: uppercase;
     letter-spacing: 4px;
-    text-shadow: 0 0 15px rgba(255, 0, 255, 1), 0 0 30px rgba(200, 0, 200, 0.9);
     font-family: 'Orbitron', sans-serif;
-    animation: glow 1.5s infinite alternate, flicker 3s infinite alternate;
-  }
-  
-  @keyframes glow {
+}
+
+/* 🌙 NEON GLOW */
+.dark .logo {
+    color: #ff00ff;
+    text-shadow: 0 0 20px #ff00ff, 0 0 40px #c800c8;
+    animation: neon-glow 1.5s infinite alternate;
+}
+
+/* For the header in light mode, make the text neon blue */
+.header.light .logo {
+    color: #0050ff;
+    text-shadow: 0 0 20px #3a80ff, 0 0 40px #0050ff;
+}
+
+/* ✨ NEON GLOW ANIMATION */
+@keyframes neon-glow {
     from {
-      text-shadow: 0 0 15px rgba(255, 0, 255, 1), 0 0 30px rgba(200, 0, 200, 0.9);
+        text-shadow: 0 0 15px #ff00ff, 0 0 30px #c800c8;
     }
     to {
-      text-shadow: 0 0 25px rgba(255, 0, 255, 1), 0 0 50px rgba(200, 0, 200, 0.9);
+        text-shadow: 0 0 25px #ff00ff, 0 0 50px #c800c8;
     }
-  }
-  
-  @keyframes flicker {
-    0% { opacity: 1; }
-    50% { opacity: 0.8; }
-    100% { opacity: 1; }
-  }
-  
-  .header.scrolled {
-    background: rgba(50, 10, 70, 1);
-    padding: 12px 5%;
-    box-shadow: 0 0 40px rgba(255, 0, 255, 1), 0 0 60px rgba(200, 0, 200, 1);
-    border-bottom: 3px solid rgba(255, 0, 255, 0.9);
-  }
-  
-  .header.scrolled .logo-icon {
-    transform: scale(0.85);
-    filter: drop-shadow(0 0 20px rgba(255, 0, 255, 1)) drop-shadow(0 0 30px rgba(200, 0, 200, 1));
-  }
-  
-  .header.scrolled .logo {
-    color: #ff00ff;
-    text-shadow: 0 0 20px rgba(255, 0, 255, 1), 0 0 40px rgba(200, 0, 200, 1);
-  }
-  
+}
+
+@keyframes neon-pulse {
+    from {
+        box-shadow: 0 0 20px #ff00ff, 0 0 30px #c800c8;
+    }
+    to {
+        box-shadow: 0 0 40px #ff00ff, 0 0 60px #c800c8;
+    }
+}
+
+/* 👤 PROFILE */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    border-radius: 30px;
+    transition: background 0.4s ease-in-out, transform 0.3s ease-in-out, box-shadow 0.4s ease-in-out;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* 🌙 DARK MODE - PROFILE */
+.dark .user-info {
+    background: linear-gradient(90deg, #3a005a, #200040);
+    box-shadow: 0 0 20px #ff00ff;
+}
+
+.dark .user-info:hover {
+    background: linear-gradient(90deg, #50006e, #32004a);
+    transform: scale(1.05);
+    box-shadow: 0 0 30px #ff00ff;
+}
+
+/* ☀️ LIGHT MODE - PROFILE */
+.light .user-info {
+    background: linear-gradient(90deg, #c6d9ff, #a6b8ff);
+    box-shadow: 0 0 20px #3a80ff, 0 0 40px #0050ff;
+}
+
+.light .user-info:hover {
+    background: linear-gradient(90deg, #acc7ff, #8ea8ff);
+    transform: scale(1.05);
+    box-shadow: 0 0 30px #3a80ff, 0 0 50px #0050ff;
+}
+
+/* 🌟 NEON TEXT FOR NAME */
+.header.dark .user-name {
+    color: #ffccff;
+    font-family: 'Orbitron', sans-serif;
+    text-shadow: 0 0 10px #ff00ff, 0 0 20px #c800c8;
+}
+
+.header.light .user-name {
+    color: #0050ff;
+    font-family: 'Orbitron', sans-serif;
+    text-shadow: 0 0 10px #3a80ff, 0 0 20px #0050ff;
+}
+
+/* 🔥 AVATAR */
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+/* 🌙 DARK MODE - AVATAR */
+.dark .user-avatar {
+    border: 2px solid #ff00ff;
+    box-shadow: 0 0 15px #ff00ff;
+}
+
+.dark .user-avatar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px #ff00ff;
+}
+
+/* ☀️ LIGHT MODE - AVATAR */
+.light .user-avatar {
+    border: 2px solid #3a80ff;
+    box-shadow: 0 0 15px #3a80ff, 0 0 25px #0050ff;
+}
+
+.light .user-avatar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px #3a80ff, 0 0 50px #0050ff;
+}
+
+/* 📱 RESPONSIVENESS */
+@media (max-width: 768px) {
+    .header {
+        padding: 12px 5%;
+    }
+    .logo {
+        font-size: 24px;
+    }
+    .user-info {
+        padding: 8px 15px;
+        font-size: 16px;
+    }
+    .user-avatar {
+        width: 45px;
+        height: 45px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 10px 3%;
+    }
+    .logo {
+        font-size: 20px;
+        letter-spacing: 2px;
+    }
+    .user-info {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* 🔄 ANIMATIONS */
+@keyframes rollRight {
+    from {
+      transform: translateX(0) rotate(0deg);
+    }
+    to {
+      transform: translateX(var(--avatar-translate)) rotate(360deg);
+    }
+}
+
+@keyframes rollLeft {
+    from {
+      transform: translateX(0) rotate(0deg);
+    }
+    to {
+      transform: translateX(var(--avatar-translate)) rotate(-360deg);
+    }
+}
+
+@keyframes moveNameRight {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(var(--name-translate));
+    }
+}
+
+@keyframes moveNameLeft {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(var(--name-translate));
+    }
+}

@@ -1,16 +1,46 @@
+/* 🌙 DARK THEME */
+body.dark .footer {
+    background: rgba(30, 10, 40, 0.95);
+    color: #ff00ff;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.8), 0 0 25px rgba(200, 0, 200, 0.6);
+    border-top: 2px solid rgba(255, 0, 255, 0.7);
+}
+
+body.dark .footer-nav a {
+    color: #ff00ff;
+}
+
+body.dark .footer-nav a:hover {
+    text-shadow: 0 0 10px #ff00ff;
+}
+
+/* ☀️ LIGHT NEON THEME */
+body.light .footer {
+    background: rgba(240, 240, 255, 0.9);
+    color: #0099ff;
+    box-shadow: 0 0 15px rgba(0, 150, 255, 0.8), 0 0 25px rgba(0, 100, 255, 0.6);
+    border-top: 2px solid rgba(0, 150, 255, 0.7);
+}
+
+body.light .footer-nav a {
+    color: #0099ff;
+}
+
+body.light .footer-nav a:hover {
+    text-shadow: 0 0 10px #0099ff;
+}
+
+/* 🌟 GENERAL STYLES */
 .footer {
     width: 100%;
     max-width: 100vw;
-    background: rgba(30, 10, 40, 0.95);
     backdrop-filter: blur(15px);
     padding: 20px 5%;
     text-align: center;
-    color: #ff00ff;
     font-family: 'Orbitron', sans-serif;
-    box-shadow: 0 0 15px rgba(255, 0, 255, 0.8), 0 0 25px rgba(200, 0, 200, 0.6);
-    border-top: 2px solid rgba(255, 0, 255, 0.7);
     box-sizing: border-box;
     overflow: hidden;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 .footer-content {
@@ -31,22 +61,7 @@
 }
 
 .footer-nav a {
-    color: #ff00ff;
     text-decoration: none;
     font-weight: bold;
     transition: 0.3s;
-}
-
-.footer-nav a:hover {
-    text-shadow: 0 0 10px #ff00ff;
-}
-
-.page-wrapper {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
-.page-content {
-    flex-grow: 1;
 }

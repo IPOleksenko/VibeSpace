@@ -43,14 +43,17 @@ const Body = ({ children }) => {
 
     const updateStars = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "rgba(255, 0, 255, 0.8)";
+      
+      const isDark = document.body.classList.contains("dark");
+      const fillBase = isDark ? "255, 0, 255" : "50, 100, 255";
+      const shadowBase = isDark ? "255, 0, 255" : "50, 100, 255";
 
       stars.current.forEach((star, index) => {
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 0, 255, ${star.opacity})`;
+        ctx.fillStyle = `rgba(${fillBase}, ${star.opacity})`;
         ctx.shadowBlur = 10;
-        ctx.shadowColor = "rgba(255, 0, 255, 0.8)";
+        ctx.shadowColor = `rgba(${shadowBase}, 0.8)`;
         ctx.fill();
 
         star.y += star.speed;

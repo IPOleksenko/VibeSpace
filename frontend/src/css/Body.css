@@ -1,45 +1,98 @@
+/* 🌙 DARK THEME */
+body.dark .body-container {
+    background: radial-gradient(circle, rgba(60, 10, 90, 0.9) 0%, rgba(10, 0, 20, 1) 90%);
+}
+
+body.dark .content {
+    background: rgba(40, 10, 60, 0.95);
+    animation: neonGlowPurple 3s infinite alternate ease-in-out;
+    border: 2px solid rgba(255, 0, 255, 0.6);
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
+}
+
+/* ☀️ LIGHT THEME */
+body.light .body-container {
+    background: radial-gradient(circle, rgba(220, 230, 255, 0.7) 0%, rgba(240, 240, 255, 1) 80%);
+}
+
+body.light .content {
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid rgba(100, 100, 255, 0.5);
+    box-shadow: 0 0 20px rgba(100, 150, 255, 0.5), 0 0 40px rgba(150, 180, 255, 0.4);
+    animation: neonGlowBlue 3s infinite alternate ease-in-out;
+    transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+/* 🌟 GENERAL STYLES */
 .body-container {
     width: 100%;
     min-height: 100vh;
-    background: radial-gradient(circle, rgba(50, 10, 70, 0.8) 0%, rgba(10, 0, 20, 1) 80%);
     display: flex;
     justify-content: center;
     align-items: flex-start;
     position: relative;
     overflow: hidden;
-  }
-  
-  .background-canvas {
+    transition: background 0.3s ease-in-out;
+}
+
+.background-canvas {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     pointer-events: none;
-  }
-  
-  @keyframes neonGlow {
+}
+
+/* 🌙 NEON GLOW FOR DARK THEME */
+@keyframes neonGlowPurple {
     0% {
-      box-shadow: 0 0 15px rgba(255, 0, 255, 0.4), 0 0 30px rgba(255, 0, 255, 0.3);
+        box-shadow: 0 0 20px rgba(255, 0, 255, 0.5), 0 0 40px rgba(255, 0, 255, 0.4);
     }
     50% {
-      box-shadow: 0 0 35px rgba(255, 50, 255, 0.8), 0 0 70px rgba(255, 0, 255, 0.7);
+        box-shadow: 0 0 40px rgba(255, 50, 255, 0.9), 0 0 80px rgba(255, 0, 255, 0.8);
     }
     100% {
-      box-shadow: 0 0 15px rgba(255, 0, 255, 0.4), 0 0 30px rgba(255, 0, 255, 0.3);
+        box-shadow: 0 0 20px rgba(255, 0, 255, 0.5), 0 0 40px rgba(255, 0, 255, 0.4);
     }
-  }
-  
-  .content {
+}
+
+/* ☀️ NEON BLUE GLOW FOR LIGHT THEME */
+@keyframes neonGlowBlue {
+    0% {
+        box-shadow: 0 0 20px rgba(100, 150, 255, 0.5), 0 0 40px rgba(150, 180, 255, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(50, 100, 255, 0.9), 0 0 80px rgba(100, 150, 255, 0.8);
+    }
+    100% {
+        box-shadow: 0 0 20px rgba(100, 150, 255, 0.5), 0 0 40px rgba(150, 180, 255, 0.4);
+    }
+}
+
+/* 🏠 CONTENT BLOCK */
+.content {
     width: 80%;
     max-width: 1200px;
     min-height: 100vh;
-    background: rgba(40, 10, 60, 0.9);
     padding: 30px;
     position: relative;
     z-index: 1;
-    
-    border: none;
-    animation: neonGlow 3s infinite alternate ease-in-out;
-  }
-  
+    border-radius: 12px;
+    transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+/* 📱 RESPONSIVENESS */
+@media (max-width: 768px) {
+    .content {
+        width: 90%;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .content {
+        width: 95%;
+        padding: 15px;
+    }
+}

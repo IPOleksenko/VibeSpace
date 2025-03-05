@@ -134,6 +134,7 @@ const AuthForm = () => {
         console.log("Login successful:", data);
         localStorage.setItem("token", data.token);
         navigate("/");
+        window.location.reload();
       } else {
         console.error("Login failed:", data);
         setRegError(data);
