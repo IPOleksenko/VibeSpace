@@ -1,8 +1,27 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../css/Header.css";
-import logoIcon from "../logo.svg";
+import ModifiedLogoSVG from "../Components/ModifiedLogoSVG";
 
 const API_URL = process.env.REACT_APP_API_URL;
+
+const AnimatedLogo = ({ text }) => {
+  return (
+    <h1 className="logo">
+      {text.split("").map((char, index) => (
+        <span
+          key={index}
+          className="logo-letter"
+          style={{
+            transition: "color 0.5s ease",
+            transitionDelay: `${index * 0.1}s`
+          }}
+        >
+          {char}
+        </span>
+      ))}
+    </h1>
+  );
+};
 
 const Header = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -125,10 +144,10 @@ const Header = () => {
       }}
     >
       <div className="header-content">
-      <div className="logo-container" style = {{display: "flex"}}>
-        <img src={logoIcon} alt="VibeSpace Icon" className="logo-icon" />
-        <h1 className="logo">VibeSpace</h1>
-      </div>
+        <div className="logo-container" style={{ display: "flex" }}>
+          <ModifiedLogoSVG />
+          <AnimatedLogo text="VibeSpace" />
+        </div>
         {user && (
           <div
             ref={containerRef}

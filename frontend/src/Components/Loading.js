@@ -10,10 +10,13 @@ const Loading = () => {
         setLoading(false);
       }
     };
-
+  
+    checkContentLoaded();
+  
     document.addEventListener("readystatechange", checkContentLoaded);
     return () => document.removeEventListener("readystatechange", checkContentLoaded);
   }, []);
+  
 
   if (!loading) return null;
 
