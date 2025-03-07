@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
-from .serializers import UserRegistrationSerializer
+from .serializers import UserRegistrationSerializer, UserProfileSerializer
 from .models import UserProfile
 
 class RegisterUserView(APIView):
@@ -56,4 +56,38 @@ class UserProfileView(APIView):
             "phone_number": user.phone_number,
             "avatar_base64": user.avatar_base64
         })
-    
+
+class UserSearchView(APIView):
+    def get(self, request):
+        query = request.GET.get('query', None)
+        if not query:
+            return Response({"error": "The 'query' parameter is not provided."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            if query.isdigit():
+                try:
+                    user = UserProfile.objects.get(id=query)
+                    serializer = UserProfileSerializer(user)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                except UserProfile.DoesNotExist:
+                    return Response({"error": "User with this ID was not found."}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                users = UserProfile.objects.filter(username__icontains=query)
+                if users.exists():
+                    serializer = UserProfileSerializer(users, many=True)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": "User with this username was not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": "Error: " + str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class GetUserByIdView(APIView):
+    def get(self, request, id):
+        try:
+            user = UserProfile.objects.get(id=id)
+        except UserProfile.DoesNotExist:
+            return Response(
+                {"error": "User with this ID was not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = UserProfileSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)

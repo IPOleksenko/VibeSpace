@@ -65,6 +65,22 @@ const useCachedLogos = () => {
   return logos;
 };
 
+const useFavicon = (faviconUrl) => {
+    useEffect(() => {
+      if (!faviconUrl) return;
+  
+      const link = document.querySelector("link[rel~='icon']");
+      if (link) {
+        link.href = faviconUrl;
+      } else {
+        const newLink = document.createElement("link");
+        newLink.rel = "icon";
+        newLink.href = faviconUrl;
+        document.head.appendChild(newLink);
+      }
+    }, [faviconUrl]);
+  };
+  
 const ModifiedLogoSVG = () => {
   const theme = useTheme();
   const logos = useCachedLogos();
@@ -76,6 +92,8 @@ const ModifiedLogoSVG = () => {
     }
   }, [logos, theme]);
 
+  useFavicon(visibleLogo);
+  
   return (
     <div className="logo-icon" style={{ position: "relative" }}>
       {logos.light && logos.dark && (
