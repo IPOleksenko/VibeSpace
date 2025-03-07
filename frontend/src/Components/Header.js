@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../css/Header.css";
 import ModifiedLogoSVG from "../Components/ModifiedLogoSVG";
+import Menu from "./Menu";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -144,6 +145,7 @@ const Header = () => {
       }}
     >
       <div className="header-content">
+      <Menu />
         <div className="logo-container" style={{ display: "flex" }}>
           <ModifiedLogoSVG />
           <AnimatedLogo text="VibeSpace" />

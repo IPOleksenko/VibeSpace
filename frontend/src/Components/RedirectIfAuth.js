@@ -1,15 +1,18 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const RedirectIfAuth = ({ children }) => {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const allowedPages = ["/auth"];
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        if (token) {
+        if (token && allowedPages.includes(location.pathname)) {
             navigate("/");
         }
-    }, [navigate]);
+    }, [navigate, location.pathname]);
 
     return children;
 };
