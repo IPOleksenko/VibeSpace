@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import logo from "../logo.svg";
 
 const useTheme = () => {
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
 
   useEffect(() => {
     const checkTheme = () => {
-      const newTheme = localStorage.getItem("theme") || "light";
+      const newTheme = localStorage.getItem("theme") || "dark";
       if (newTheme !== theme) {
         setTheme(newTheme);
       }

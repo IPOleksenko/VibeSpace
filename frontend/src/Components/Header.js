@@ -30,16 +30,11 @@ const Header = () => {
   const [user, setUser] = useState(null);
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
   const [swapped, setSwapped] = useState(false);
-  // States to store offsets applied to elements
   const [avatarTranslation, setAvatarTranslation] = useState(0);
   const [nameTranslation, setNameTranslation] = useState(0);
-
-  // Refs for accessing DOM elements
   const containerRef = useRef(null);
   const avatarRef = useRef(null);
   const nameRef = useRef(null);
-
-  // Save initial positions (relative to the container) on the first render
   const initialAvatarOffsetRef = useRef(0);
   const initialNameOffsetRef = useRef(0);
 
@@ -73,7 +68,6 @@ const Header = () => {
     fetchUser();
   }, []);
 
-  // Measure initial positions of elements relative to the container after user data is loaded
   useEffect(() => {
     if (user && containerRef.current && avatarRef.current && nameRef.current) {
       const containerRect = containerRef.current.getBoundingClientRect();
@@ -101,39 +95,31 @@ const Header = () => {
       setSwapped((prev) => !prev);
       return;
     }
-
     const containerRect = containerRef.current.getBoundingClientRect();
     const containerWidth = containerRect.width;
-    const leftPadding = 20; // corresponds to padding-left in CSS
-    const rightPadding = 20; // corresponds to padding-right in CSS
-
+    const leftPadding = 20;
+    const rightPadding = 20;
     const avatarWidth = avatarRef.current.getBoundingClientRect().width;
     const nameWidth = nameRef.current.getBoundingClientRect().width;
-
     let avatarTarget, nameTarget;
     if (!swapped) {
-      // Initially: name on the left, avatar on the right.
-      // Swap: move avatar to the left edge, move name to the right edge.
       avatarTarget = leftPadding;
       nameTarget = containerWidth - rightPadding - nameWidth;
     } else {
-      // Reverse swap: move avatar to the right edge, move name to the left edge.
       avatarTarget = containerWidth - rightPadding - avatarWidth;
       nameTarget = leftPadding;
     }
-
-    // Calculate new offsets relative to the initially measured positions
     const newAvatarTranslation =
       avatarTarget - initialAvatarOffsetRef.current;
     const newNameTranslation = nameTarget - initialNameOffsetRef.current;
-
-    // Update state
     setAvatarTranslation(newAvatarTranslation);
     setNameTranslation(newNameTranslation);
-
-    // Toggle theme and swapped state
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
     setSwapped((prev) => !prev);
+  };
+
+  const handleLogoClick = () => {
+    window.location.href = "/";
   };
 
   return (
@@ -144,9 +130,24 @@ const Header = () => {
         transition: "transform 0.3s ease-out",
       }}
     >
+      <style>
+        {`
+          .clickable-logo {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+          }
+          .clickable-logo:hover {
+            transform: scale(1.05);
+          }
+        `}
+      </style>
       <div className="header-content">
-      <Menu />
-        <div className="logo-container" style={{ display: "flex" }}>
+        <Menu />
+        <div
+          className="logo-container clickable-logo"
+          style={{ display: "flex", cursor: user ? "pointer" : "default" }}
+          onClick={user ? handleLogoClick : undefined}
+        >
           <ModifiedLogoSVG />
           <AnimatedLogo text="VibeSpace" />
         </div>
