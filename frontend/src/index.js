@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import RequireAuth from "./Components/RequireAuth";
-import FetchWithAuth from "./Components/FetchWithAuth";
+import { checkAuthToken, checkUserStatus } from "./Components/FetchWithAuth";
 import RedirectIfAuth from "./Components/RedirectIfAuth";
 import Header from "./Components/Header";
 import Loading from "./Components/Loading";
@@ -12,7 +12,8 @@ import Footer from "./Components/Footer";
 import "./css/index.css";
 import "./css/Header.css";
 
-FetchWithAuth();
+checkAuthToken();
+checkUserStatus();
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
