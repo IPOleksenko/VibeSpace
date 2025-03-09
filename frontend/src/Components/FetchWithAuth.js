@@ -16,8 +16,10 @@ const FetchWithAuth = async () => {
 
         if (!response.ok) {
             const data = await response.json();
-            if (response.status === 403 && data.forceLogout) {
-                handleLogout();
+            if (response.status === 401) {
+                handleLogout("Unauthorized: You have been logged out due to invalid login information.");
+            } else if (response.status === 403 && data.forceLogout) {
+                handleLogout("Your account has been deactivated. You will be logged out.");
             }
         }
     } catch (error) {
@@ -27,8 +29,8 @@ const FetchWithAuth = async () => {
     return Promise.resolve();
 };
 
-const handleLogout = () => {
-    alert("Your account has been deactivated. You will be logged out.");
+const handleLogout = (message) => {
+    alert(message);
     localStorage.removeItem("token");
     window.location.href = "/auth"; 
 };
