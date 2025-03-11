@@ -48,7 +48,7 @@ const Header = () => {
       const token = localStorage.getItem("token");
       if (!token) return;
       try {
-        const response = await fetch(`${API_URL}/api/user/`, {
+        const response = await fetch(`${API_URL}/api/accounts/user/`, {
           method: "GET",
           headers: {
             Authorization: `Token ${token}`,

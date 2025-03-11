@@ -12,7 +12,7 @@ const Menu = () => {
 
   useEffect(() => {
     if (token) {
-      fetch(`${API_URL}/api/user/`, {
+      fetch(`${API_URL}/api/accounts/user/`, {
         method: "GET",
         headers: {
           Authorization: `Token ${token}`,

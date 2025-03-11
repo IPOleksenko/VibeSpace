@@ -17,7 +17,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/user/${id}`);
+        const response = await fetch(`${API_URL}/api/accounts/user/${id}`);
         const data = await response.json();
         if (response.ok) {
           setUser(data);
@@ -40,7 +40,7 @@ const Profile = () => {
     const fetchCurrentUser = async () => {
       const token = localStorage.getItem("token");
       try {
-        const response = await fetch(`${API_URL}/api/user/`, {
+        const response = await fetch(`${API_URL}/api/accounts/user/`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

@@ -23,7 +23,7 @@ const ProfileSearch = () => {
   const fetchSuggestions = async (query) => {
     try {
       const response = await fetch(
-        `${API_URL}/api/user/search/?query=${encodeURIComponent(query)}`
+        `${API_URL}/api/accounts/user/search/?query=${encodeURIComponent(query)}`
       );
       if (response.ok) {
         const data = await response.json();
