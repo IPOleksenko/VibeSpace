@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import "../css/Profile.css";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 const Profile = () => {
   const { id } = useParams(); // ID of the viewed profile
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
@@ -13,7 +14,7 @@ const Profile = () => {
   const [currentUserLoading, setCurrentUserLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch viewed profile data
+  // Fetching the viewed profile data
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -35,7 +36,7 @@ const Profile = () => {
     fetchUser();
   }, [id]);
 
-  // Fetch current authenticated user data
+  // Fetching the currently authenticated user data
   useEffect(() => {
     const fetchCurrentUser = async () => {
       const token = localStorage.getItem("token");
@@ -67,7 +68,7 @@ const Profile = () => {
     }
   }, []);
 
-  // Check subscription status
+  // Checking subscription status
   const checkSubscriptionStatus = async () => {
     const token = localStorage.getItem("token");
     try {
@@ -93,7 +94,7 @@ const Profile = () => {
     }
   };
 
-  // Call subscription status check after profile loading
+  // Call subscription status check after loading profile
   useEffect(() => {
     if (localStorage.getItem("token")) {
       checkSubscriptionStatus();
@@ -148,6 +149,30 @@ const Profile = () => {
     }
   };
 
+  // Function to create a chat
+  const handleCreateChat = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch(`${API_URL}/api/chats/create/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify({ users: [currentUser.id, user.id] }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        console.log("Chat created successfully", data);
+        navigate(`/chats/${data.id}`);
+      } else {
+        console.error("Error creating chat:", data);
+      }
+    } catch (err) {
+      console.error("Error creating chat:", err);
+    }
+  };
+
   // Function to get avatar source
   const getAvatarSrc = (avatarBase64) => {
     if (!avatarBase64) return null;
@@ -157,7 +182,7 @@ const Profile = () => {
     return `data:image/jpeg;base64,${avatarBase64}`;
   };
 
-  // Determine if the viewed profile is the user's own
+  // Determine if the viewed profile belongs to the current user
   const isOwnProfile =
     currentUser && user && parseInt(currentUser.id, 10) === parseInt(user.id, 10);
 
@@ -183,6 +208,7 @@ const Profile = () => {
           />
         )}
       </div>
+      {/* Subscription actions */}
       {!currentUserLoading && (!currentUser || !isOwnProfile) && (
         <div className="subscription-actions">
           {subscriptionStatus ? (
@@ -198,6 +224,19 @@ const Profile = () => {
           )}
         </div>
       )}
+      {/* The chat button appears only if:
+            - the current user exists and is not viewing their own profile,
+            - subscriptions are mutual (is_subscribed && is_subscribed_back) */}
+      {!currentUserLoading &&
+        currentUser &&
+        !isOwnProfile &&
+        subscriptionStatus &&
+        subscriptionStatus.is_subscribed &&
+        subscriptionStatus.is_subscribed_back && (
+          <div className="chat-actions">
+            <button onClick={handleCreateChat}>Start Chat</button>
+          </div>
+        )}
     </div>
   );
 };

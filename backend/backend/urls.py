@@ -7,4 +7,5 @@ urlpatterns = [
     path('api/accounts/', include('accounts.urls')),
     path('api/subscriptions/', include('subscriptions.urls')),
     path('api/AWS/', include('AWS.S3.urls')),
+    path('api/chats/', include('chats.urls')),
 ]
