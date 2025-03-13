@@ -6,6 +6,7 @@ import Settings from "./Pages/Settings";
 import ProfileSearch from "./Pages/ProfileSearch";
 import Profile from "./Pages/Profile";
 import Chats from "./Pages/Chats";
+import ChatMessages from "./Pages/ChatMessages";
 
 function App() {
     return (
@@ -17,6 +18,7 @@ function App() {
               <Route path="/profile" element={<ProfileSearch />} />
               <Route path="/profile/:id" element={<Profile />} />
               <Route path="/chats" element={<Chats />} />
+              <Route path="/chats/:chatId" element={<ChatMessages />} />
 
               <Route path="*" element={<PageNotFound />} />
            </Routes>
