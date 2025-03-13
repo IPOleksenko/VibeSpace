@@ -9,6 +9,7 @@ const ChatMessages = () => {
     const [users, setUsers] = useState({});
     const [text, setText] = useState("");
     const [file, setFile] = useState(null);
+    const [errorMessage, setErrorMessage] = useState("");
     const token = localStorage.getItem("token");
 
     useEffect(() => {
@@ -21,8 +22,20 @@ const ChatMessages = () => {
             headers: { Authorization: `Token ${token}` },
         })
             .then((res) => res.json())
-            .then((data) => setMessages(data))
-            .catch((error) => console.error("Error loading messages:", error));
+            .then((data) => {
+                if (Array.isArray(data)) {
+                    setMessages(data);
+                    setErrorMessage(""); // Clear the error if data is received
+                } else {
+                    setMessages([]);
+                    setErrorMessage(data.detail || "Access to the chat is not allowed.");
+                }
+            })
+            .catch((error) => {
+                console.error("Error loading messages:", error);
+                setMessages([]);
+                setErrorMessage("Error loading messages.");
+            });
     }, [chatId]);
 
     const fetchUserInfo = (userId) => {
@@ -91,62 +104,70 @@ const ChatMessages = () => {
         }
     };
 
+    if (errorMessage) {
+        return <p style={{ color: "red" }}>{errorMessage}</p>; // Hide chat if there is no access
+    }
+
     return (
         <div>
             <h2>Chat {chatId}</h2>
             <div>
-                {messages.map((msg) => (
-                    <div key={msg.id} style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
-                        {users[msg.user] && users[msg.user].avatar_base64 ? (
-                            <img
-                                src={`data:image/png;base64,${users[msg.user].avatar_base64}`}
-                                alt="avatar"
-                                style={{
-                                    width: "30px",
-                                    height: "30px",
-                                    borderRadius: "50%",
-                                    marginRight: "10px",
-                                }}
-                            />
-                        ) : null}
-                        <div>
-                            <strong>
-                                {users[msg.user] ? users[msg.user].username : "Unknown"}
-                            </strong>
-                            : {msg.text}
-                            {msg.media?.file_url ? (
-                                msg.media.file_url.match(/\.(jpg|png|gif|jpeg)$/) ? (
-                                    <img
-                                        src={msg.media.file_url}
-                                        alt="media"
-                                        style={{ maxWidth: "200px", display: "block", marginTop: "10px" }}
-                                    />
-                                ) : msg.media.file_url.match(/\.(mp4|webm)$/) ? (
-                                    <video
-                                        controls
-                                        style={{ maxWidth: "200px", display: "block", marginTop: "10px" }}
-                                    >
-                                        <source src={msg.media.file_url} type="video/mp4" />
-                                        Your browser does not support the video element.
-                                    </video>
-                                ) : msg.media.file_url.match(/\.(mp3|wav)$/) ? (
-                                    <audio controls style={{ display: "block", marginTop: "10px" }}>
-                                        <source src={msg.media.file_url} type="audio/mp3" />
-                                        Your browser does not support the audio element.
-                                    </audio>
-                                ) : (
-                                    <a
-                                        href={msg.media.file_url}
-                                        download
-                                        style={{ display: "block", marginTop: "10px" }}
-                                    >
-                                        Download file
-                                    </a>
-                                )
+                {messages.length > 0 ? (
+                    messages.map((msg) => (
+                        <div key={msg.id} style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
+                            {users[msg.user] && users[msg.user].avatar_base64 ? (
+                                <img
+                                    src={`data:image/png;base64,${users[msg.user].avatar_base64}`}
+                                    alt="avatar"
+                                    style={{
+                                        width: "30px",
+                                        height: "30px",
+                                        borderRadius: "50%",
+                                        marginRight: "10px",
+                                    }}
+                                />
                             ) : null}
+                            <div>
+                                <strong>
+                                    {users[msg.user] ? users[msg.user].username : "Unknown"}
+                                </strong>
+                                : {msg.text}
+                                {msg.media?.file_url ? (
+                                    msg.media.file_url.match(/\.(jpg|png|gif|jpeg)$/) ? (
+                                        <img
+                                            src={msg.media.file_url}
+                                            alt="media"
+                                            style={{ maxWidth: "200px", display: "block", marginTop: "10px" }}
+                                        />
+                                    ) : msg.media.file_url.match(/\.(mp4|webm)$/) ? (
+                                        <video
+                                            controls
+                                            style={{ maxWidth: "200px", display: "block", marginTop: "10px" }}
+                                        >
+                                            <source src={msg.media.file_url} type="video/mp4" />
+                                            Your browser does not support the video element.
+                                        </video>
+                                    ) : msg.media.file_url.match(/\.(mp3|wav)$/) ? (
+                                        <audio controls style={{ display: "block", marginTop: "10px" }}>
+                                            <source src={msg.media.file_url} type="audio/mp3" />
+                                            Your browser does not support the audio element.
+                                        </audio>
+                                    ) : (
+                                        <a
+                                            href={msg.media.file_url}
+                                            download
+                                            style={{ display: "block", marginTop: "10px" }}
+                                        >
+                                            Download file
+                                        </a>
+                                    )
+                                ) : null}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))
+                ) : (
+                    <p>No messages.</p>
+                )}
             </div>
             <form onSubmit={handleSendMessage}>
                 <input
