@@ -9,6 +9,10 @@
 
 ## 📌 Setup Instructions
 
+### ⚡ Enable Redis and Configure `.env`
+
+Ensure Redis is running on your system and configure the necessary settings in `backend/.env`. Make sure Redis is active before starting the project.
+
 ### 🔧 Fill Environment Files
 Ensure that all required environment variables are present in both `backend/.env` and `frontend/.env` files before proceeding.
 
