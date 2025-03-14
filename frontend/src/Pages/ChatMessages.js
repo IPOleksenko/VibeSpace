@@ -12,12 +12,8 @@ const ChatMessages = () => {
     const [errorMessage, setErrorMessage] = useState("");
     const token = localStorage.getItem("token");
 
-    useEffect(() => {
-        if (!chatId) {
-            console.error("Error: chatId is undefined!");
-            return;
-        }
-
+    // Function to load messages
+    const fetchMessages = () => {
         fetch(`${API_URL}/api/chat_messages/${chatId}/messages/`, {
             headers: { Authorization: `Token ${token}` },
         })
@@ -25,7 +21,7 @@ const ChatMessages = () => {
             .then((data) => {
                 if (Array.isArray(data)) {
                     setMessages(data);
-                    setErrorMessage(""); // Clear the error if data is received
+                    setErrorMessage("");
                 } else {
                     setMessages([]);
                     setErrorMessage(data.detail || "Access to the chat is not allowed.");
@@ -36,6 +32,49 @@ const ChatMessages = () => {
                 setMessages([]);
                 setErrorMessage("Error loading messages.");
             });
+    };
+
+    useEffect(() => {
+        if (!chatId) {
+            console.error("Error: chatId is undefined!");
+            return;
+        }
+
+        fetchMessages(); // Load messages on component mount
+
+        const socket = new WebSocket(`ws://localhost:8001/ws/chat/${chatId}/`);
+
+        socket.onopen = () => console.log("Connected to WebSocket!");
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === "message") {
+                // Transform the received message to match the API format
+                const newMessage = {
+                    id: data.id,
+                    // Convert the user object to its id,
+                    // to later use it for retrieving user information
+                    user: data.user.id,
+                    chat: data.chat,
+                    text: data.text,
+                    uploaded_at: data.uploaded_at,
+                    media: data.media_url ? { file_url: data.media_url } : null,
+                };
+                setMessages((prevMessages) => [...prevMessages, newMessage]);
+                if (!users[newMessage.user]) {
+                    fetchUserInfo(newMessage.user);
+                }
+            } else if (data.type === "notification") {
+                console.log("New message notification received, updating messages...");
+                fetchMessages(); // Reload messages on notification
+            }
+        };
+
+        socket.onerror = (event) => console.error("WebSocket error:", event);
+
+        socket.onclose = () => console.log("WebSocket closed!");
+
+        return () => socket.close();
     }, [chatId]);
 
     const fetchUserInfo = (userId) => {
@@ -63,21 +102,15 @@ const ChatMessages = () => {
     const handleSendMessage = async (e) => {
         e.preventDefault();
 
-        if (!chatId) {
-            console.error("Error: chatId is missing in the request!");
-            return;
-        }
-        if (!text && !file) {
-            console.error("Error: Empty message and no file!");
+        if (!chatId || (!text && !file)) {
+            console.error("Error: Missing chatId or message content!");
             return;
         }
 
         const formData = new FormData();
         formData.append("chat", chatId);
         formData.append("text", text);
-        if (file) {
-            formData.append("file", file);
-        }
+        if (file) formData.append("file", file);
 
         try {
             const response = await fetch(`${API_URL}/api/chat_messages/create/`, {
@@ -87,25 +120,19 @@ const ChatMessages = () => {
             });
 
             const responseData = await response.json();
+            if (!response.ok) throw new Error(responseData.detail || "Error sending message");
 
-            if (!response.ok) {
-                throw new Error(responseData.detail || "Error sending message");
-            }
-
-            setMessages([...messages, responseData]);
             setText("");
             setFile(null);
 
-            if (!users[responseData.user]) {
-                fetchUserInfo(responseData.user);
-            }
+            if (!users[responseData.user]) fetchUserInfo(responseData.user);
         } catch (error) {
             console.error("Error:", error.message);
         }
     };
 
     if (errorMessage) {
-        return <p style={{ color: "red" }}>{errorMessage}</p>; // Hide chat if there is no access
+        return <p style={{ color: "red" }}>{errorMessage}</p>;
     }
 
     return (

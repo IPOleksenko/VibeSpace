@@ -10,6 +10,9 @@ from .serializers import ChatMessageSerializer, ChatMessageReadSerializer
 from AWS.S3.models import UserMedia
 from AWS.S3.views import S3FileUploadView  
 from chats.views import Chat
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+import json
 
 class ChatMessageCreateView(APIView):
     authentication_classes = [TokenAuthentication]
@@ -33,6 +36,8 @@ class ChatMessageCreateView(APIView):
 
         # Check if a file is present in the request
         file_obj = request.FILES.get("file")
+        media_url = None
+
         if file_obj:
             print(f"File received: {file_obj.name}, size: {file_obj.size} bytes")
 
@@ -46,12 +51,12 @@ class ChatMessageCreateView(APIView):
             print("Response from S3:", response.data)
 
             if response.status_code == status.HTTP_201_CREATED:
-                media_id = response.data.get("data", {}).get("id")
-                if media_id:
-                    data["media"] = media_id
-                    print("media_id after upload:", media_id)
+                media_url = response.data.get("data", {}).get("file_url")
+                if media_url:
+                    data["media"] = response.data.get("data", {}).get("id")  # Storing media ID
+                    print("media_id after upload:", data["media"])
                 else:
-                    return Response({"error": "Error: media_id not received"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"error": "Error: media_url not received"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({"error": "File upload error to S3"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -60,6 +65,29 @@ class ChatMessageCreateView(APIView):
         if serializer.is_valid():
             chat_message = serializer.save()
             print("Message successfully saved:", serializer.data)
+
+            # Prepare data for WebSocket
+            message_data = {
+                "type": "chat_message",
+                "id": chat_message.id,
+                "user": {
+                    "id": chat_message.user.id,
+                    "username": chat_message.user.username,
+                },
+                "chat": chat_message.chat.id,
+                "text": chat_message.text,
+                "uploaded_at": chat_message.uploaded_at.isoformat(),
+                "media_url": chat_message.media.file_url if chat_message.media else None,  # Using media.file_url
+            }
+
+            print("Sending WebSocket message:", json.dumps(message_data, indent=4))  # Logging the data
+
+            # Sending message to WebSocket
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f"chat_{chat_id}", message_data
+            )
+
             return Response(ChatMessageSerializer(chat_message).data, status=status.HTTP_201_CREATED)
 
         print("Serialization error:", serializer.errors)

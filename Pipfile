@@ -16,6 +16,9 @@ boto3 = "*"
 django-storages = "*"
 pytest = "*"
 pytest-django = "*"
+channels = "*"
+channels-redis = "*"
+daphne = "*"
 
 [dev-packages]
 

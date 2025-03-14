@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'storages',
+    "channels",
 
     'accounts',
     'subscriptions',
@@ -124,3 +125,26 @@ AWS_QUERYSTRING_AUTH = False  # Makes files publicly available
 # URL to access files
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+
+# Redis
+ASGI_APPLICATION = "asgi.application"
+
+CORS_ALLOWED_ORIGINS = [
+    os.getenv("FRONTEND_URL"),  
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    os.getenv("FRONTEND_URL"),
+]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(os.getenv("REDIS_URL"), os.getenv("REDIS_PORT"))],
+            "capacity": 1000000
+        },
+    },
+}
