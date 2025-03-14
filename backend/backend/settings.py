@@ -127,15 +127,7 @@ AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
 
 # Redis
-ASGI_APPLICATION = "asgi.application"
-
-CORS_ALLOWED_ORIGINS = [
-    os.getenv("FRONTEND_URL"),  
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    os.getenv("FRONTEND_URL"),
-]
+ASGI_APPLICATION = "backend.asgi.application"
 
 CORS_ALLOW_ALL_ORIGINS = True
 
