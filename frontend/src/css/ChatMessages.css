@@ -1,0 +1,213 @@
+/* General chat container */
+.chat-container {
+    padding: 20px;
+    position: relative;
+    padding-bottom: 120px;
+}
+
+/* Chat header */
+.chat-container h2 {
+    margin-bottom: 15px;
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Message area */
+.chat-container > div {
+    padding: 15px;
+    border-radius: 10px;
+}
+
+/* Dark theme for the message area */
+body.dark .chat-container > div {
+    background: linear-gradient(90deg, #300040 0%, #200030 100%);
+    box-shadow: 0 0 30px #ff00ff, 0 0 50px #c800c8;
+}
+
+/* Light theme for the message area */
+body.light .chat-container > div {
+    background: linear-gradient(90deg, #d9e4ff 0%, #f0f0fa 100%);
+    box-shadow: 0 0 30px #3a80ff, 0 0 50px #0050ff;
+}
+
+/* Styles for each message */
+.message-item {
+    margin-bottom: 15px;
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+}
+
+/* Avatars */
+.avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.avatar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Message bubble */
+.message-bubble {
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 60%;
+    word-break: break-word;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    border: 1px solid transparent;
+    transition: border 0.3s ease;
+}
+
+/* Text color in the message bubble depends on the theme */
+body.dark .message-bubble {
+    color: #212121;
+}
+body.light .message-bubble {
+    color: #000;
+}
+
+/* Color scheme for the recipient's messages */
+body.dark .message-item:not(.my-message) .message-bubble {
+    background-color: #E1BEE7 !important;
+    border-color: #BA68C8 !important;
+}
+body.light .message-item:not(.my-message) .message-bubble {
+    background-color: #E3F2FD !important;
+    border-color: #64B5F6 !important;
+}
+
+/* Color scheme for my messages */
+body.dark .message-item.my-message .message-bubble {
+    background-color: #FCE4EC !important;
+    border-color: #EC407A !important;
+}
+body.light .message-item.my-message .message-bubble {
+    background-color: #FFF9C4 !important;
+    border-color: #FDD835 !important;
+}
+
+/* Message header */
+.message-header {
+    font-size: 0.9em;
+    margin-bottom: 5px;
+}
+
+/* Message file */
+.message-file {
+    margin-bottom: 5px;
+}
+
+/* Message text */
+.message-text {
+    font-size: 1em;
+}
+
+/* Media elements */
+/* Images */
+.media-image {
+    margin-top: 5px;
+    max-width: 200px;
+    display: block;
+    border-radius: 8px;
+}
+/* Videos */
+.message-video {
+    margin-top: 5px;
+    max-width: 100%;
+    display: block;
+    border-radius: 8px;
+    border: 2px solid;
+    transition: border-color 0.3s ease;
+}
+body.dark .message-video {
+    border-color: #ff00ff;
+}
+body.light .message-video {
+    border-color: #3a80ff;
+}
+/* Audio */
+.message-audio {
+    margin-top: 5px;
+    width: 100%;
+    display: block;
+    border-radius: 8px;
+    padding: 5px;
+    border: 1px solid;
+    transition: border-color 0.3s ease, background 0.3s ease;
+}
+body.dark .message-audio {
+    background: rgba(255,255,255,0.1);
+    border-color: #ff00ff;
+}
+body.light .message-audio {
+    background: rgba(0,0,0,0.05);
+    border-color: #3a80ff;
+}
+
+/* File download link */
+.file-download {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background 0.3s ease;
+}
+body.dark .file-download {
+    background: #300040;
+    color: #fff;
+    border: 1px solid #ff00ff;
+}
+body.light .file-download {
+    background: #d9e4ff;
+    color: #000;
+    border: 1px solid #3a80ff;
+}
+.file-download:hover {
+    opacity: 0.8;
+}
+
+/* Styles for the message input form */
+.chat-input {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    background: inherit;
+    z-index: 1000;
+    transition: bottom 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Styles for textarea */
+.chat-textarea {
+    flex: 1;
+    min-height: 40px;
+    max-height: 150px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid;
+    font-size: 14px;
+    resize: vertical;
+    overflow-y: auto;
+}
+
+/* Styles for file input and send button */
+.chat-file-input,
+.chat-send-button {
+    flex: 0 0 auto;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid;
+    font-size: 14px;
+}

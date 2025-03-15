@@ -11,7 +11,6 @@ social-auth-app-django = "*"
 djangorestframework = "*"
 django-cors-headers = "*"
 pillow = "*"
-nodeenv = "*"
 boto3 = "*"
 django-storages = "*"
 pytest = "*"
@@ -19,6 +18,7 @@ pytest-django = "*"
 channels = "*"
 channels-redis = "*"
 daphne = "*"
+nodeenv = "*"
 
 [dev-packages]
 
