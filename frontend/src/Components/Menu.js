@@ -55,6 +55,9 @@ const Menu = () => {
         <div className="menu">
           <button className="menu-item" onClick={() => handleNavigation("Chats")}>
             Chats
+          </button>          
+          <button className="menu-item" onClick={() => navigate("/post/create")}>
+            Post Create
           </button>
           <button className="menu-item" onClick={() => handleNavigation("Profile")}>
             Search User

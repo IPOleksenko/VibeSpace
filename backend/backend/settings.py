@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'subscriptions',
     'chats',
     'chat_messages',
+    'posts',
     'AWS.S3',
 ]
 
