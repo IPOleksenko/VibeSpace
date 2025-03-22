@@ -4,6 +4,36 @@ import "../css/Profile.css";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
+// New component for switching media files within a single post
+const MediaSlider = ({ media, renderMediaItem }) => {
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+
+  const handlePrevMedia = () => {
+    setCurrentMediaIndex((prev) =>
+      prev === 0 ? media.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextMedia = () => {
+    setCurrentMediaIndex((prev) =>
+      prev === media.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  return (
+    <div className="media-slider">
+      {renderMediaItem(media[currentMediaIndex])}
+      <div className="slider-controls">
+        <button onClick={handlePrevMedia}>Previous</button>
+        <span>
+          {currentMediaIndex + 1} / {media.length}
+        </span>
+        <button onClick={handleNextMedia}>Next</button>
+      </div>
+    </div>
+  );
+};
+
 const Profile = () => {
   const { id } = useParams(); // ID of the viewed profile
   const navigate = useNavigate();
@@ -13,6 +43,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [currentUserLoading, setCurrentUserLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [posts, setPosts] = useState([]);
 
   // Fetching the viewed profile data
   useEffect(() => {
@@ -182,6 +213,79 @@ const Profile = () => {
     return `data:image/jpeg;base64,${avatarBase64}`;
   };
 
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      let url = `${API_URL}/api/posts/user/get/`;
+
+      if (id) {
+        url += `?user_id=${id}`;
+      }
+
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setPosts(data);
+        } else {
+          console.error("Error fetching posts:", data);
+        }
+      } catch (err) {
+        console.error("Error fetching posts:", err);
+      }
+    };
+
+    if (currentUser) {
+      fetchPosts();
+    }
+  }, [id, currentUser]);
+
+  const getMediaSrc = (media) => {
+    if (!media || !media.file_url) return null;
+    return media.file_url.startsWith("http")
+      ? media.file_url
+      : `${API_URL}${media.file_url}`;
+  };
+
+  const renderMediaItem = (mediaItem) => {
+    const mediaSrc = getMediaSrc(mediaItem);
+    if (!mediaSrc) return null;
+    const lowerUrl = mediaSrc.toLowerCase();
+    if (lowerUrl.match(/\.(jpg|jpeg|png|gif)$/)) {
+      return (
+        <img
+          src={mediaSrc}
+          alt="Media"
+          className="fixed-media"
+        />
+      );
+    } else if (lowerUrl.match(/\.(mp4|webm)$/)) {
+      return (
+        <video controls className="fixed-media">
+          <source
+            src={mediaSrc}
+            type={`video/${lowerUrl.endsWith(".mp4") ? "mp4" : "webm"}`}
+          />
+          Your browser does not support the video tag.
+        </video>
+      );
+    } else {
+      return (
+        <a href={mediaSrc} download className="download-button">
+          Download File
+        </a>
+      );
+    }
+  };
+
   // Determine if the viewed profile belongs to the current user
   const isOwnProfile =
     currentUser && user && parseInt(currentUser.id, 10) === parseInt(user.id, 10);
@@ -237,6 +341,32 @@ const Profile = () => {
             <button onClick={handleCreateChat}>Start Chat</button>
           </div>
         )}
+      <div className="posts-container">
+        <h3>User Posts</h3>
+        {posts.length === 0
+          ? null
+          : posts.map((post, index) => (
+              <div key={post.id}>
+                <div className="post">
+                  {post.text && <p>{post.text}</p>}
+                  {post.media && post.media.length > 0 && (
+                    <div className="post-media">
+                      {post.media.length === 1
+                        ? renderMediaItem(post.media[0])
+                        : <MediaSlider media={post.media} renderMediaItem={renderMediaItem} />}
+                    </div>
+                  )}
+                  <span className="post-date">
+                    Posted on{" "}
+                    {new Date(post.uploaded_at).toLocaleString()}
+                  </span>
+                </div>
+                {index < posts.length - 1 && (
+                  <hr className="post-divider" />
+                )}
+              </div>
+            ))}
+      </div>
     </div>
   );
 };

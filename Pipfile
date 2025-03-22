@@ -19,6 +19,7 @@ channels = "*"
 channels-redis = "*"
 daphne = "*"
 nodeenv = "*"
+python-magic-bin = "*"
 
 [dev-packages]
 
