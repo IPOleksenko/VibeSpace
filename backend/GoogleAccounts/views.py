@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
 from rest_framework import status
 from .models import GoogleAccount
 from .serializers import GoogleAccountSerializer
@@ -80,3 +81,22 @@ class GoogleAccountUnlinkView(APIView):
                 {"error": "No Google account linked."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+class GoogleLoginView(APIView):
+    def post(self, request):
+        google_id = request.data.get("google_id")
+        if not google_id:
+            return Response({"error": "Google ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            google_account = GoogleAccount.objects.get(google_id=google_id)
+            user = google_account.user
+            
+            if not user.is_active:
+                return Response({"error": "Your account is inactive. Please contact support."}, status=status.HTTP_403_FORBIDDEN)
+            
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({"token": token.key, "user_id": user.id}, status=status.HTTP_200_OK)
+        
+        except GoogleAccount.DoesNotExist:
+            return Response({"error": "Google account not found"}, status=status.HTTP_404_NOT_FOUND)

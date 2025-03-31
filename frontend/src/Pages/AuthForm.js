@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../css/AuthForm.css";
 
 const API_URL = process.env.REACT_APP_API_URL;
+const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
 
 const AuthForm = () => {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -115,7 +116,7 @@ const AuthForm = () => {
       console.error("Error during registration:", error);
       setRegError({ error: "Something went wrong. Please try again." });
     }
-}; 
+  }; 
 
   const handleLogIn = async () => {
     try {
@@ -145,7 +146,6 @@ const AuthForm = () => {
     }
   };
   
-
   const handleSubmit = (e) => {
     e.preventDefault();
     setRegError(""); // clearing error message before sending
@@ -157,9 +157,63 @@ const AuthForm = () => {
     }
   };
 
+  // Google login functionality similar to obtaining Google User ID and linking
   const handleGoogleLogin = () => {
-    console.log("Logging in with Google...");
-    // Google login (OAuth) handling goes here
+    if (!CLIENT_ID) {
+      setRegError("Missing client_id. Please check the REACT_APP_CLIENT_ID variable in the .env file.");
+      return;
+    }
+    if (!window.google) {
+      setRegError("Google API not loaded");
+      return;
+    }
+    const client = window.google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: "https://www.googleapis.com/auth/userinfo.profile",
+      callback: (response) => {
+        if (response.error) {
+          setRegError("Google authorization error");
+        } else {
+          fetchGoogleUserId(response.access_token);
+        }
+      },
+    });
+    client.requestAccessToken();
+  };
+
+  const fetchGoogleUserId = async (accessToken) => {
+    try {
+      const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const googleId = data.sub;
+        console.log("Google User ID:", googleId);
+        const linkResponse = await fetch(`${API_URL}/api/accounts/google/login/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ google_id: googleId }),
+        });
+        if (linkResponse.ok) {
+          const loginData = await linkResponse.json();
+          localStorage.setItem("token", loginData.token);
+          navigate("/");
+          window.location.reload();
+        } else {
+          const errData = await linkResponse.json();
+          setRegError(errData);
+        }
+      } else {
+        setRegError("Failed to fetch Google user data");
+      }
+    } catch (error) {
+      setRegError("Error fetching Google user data");
+    }
   };
 
   return (

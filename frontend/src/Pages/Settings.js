@@ -309,7 +309,7 @@ const Settings = () => {
           </>
         ) : (
           <button type="button" onClick={handleGoogleId}>
-            Obtain and send Google User ID
+            Link Google to your account
           </button>
         )}
       </div>
