@@ -5,6 +5,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     path('api/accounts/', include('accounts.urls')),
+    path('api/accounts/google/', include('GoogleAccounts.urls')),
     path('api/subscriptions/', include('subscriptions.urls')),
     path('api/AWS/', include('AWS.S3.urls')),
     path('api/chats/', include('chats.urls')),

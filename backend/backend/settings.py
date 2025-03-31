@@ -24,6 +24,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'storages',
     "channels",
+    'social_django',
+    'GoogleAccounts',
 
     'accounts',
     'subscriptions',
@@ -43,6 +45,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 
     'accounts.middleware.InactiveUserMiddleware',
 ]
@@ -96,6 +99,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
+    'social_core.backends.google.GoogleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 ]
 

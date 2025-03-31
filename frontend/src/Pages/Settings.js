@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const API_URL = process.env.REACT_APP_API_URL;
+const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
 
 const Settings = () => {
   const [username, setUsername] = useState("");
@@ -11,9 +12,9 @@ const Settings = () => {
   const [avatar, setAvatar] = useState(null);
   const [oldAvatarPreview, setOldAvatarPreview] = useState(null);
   const [newAvatarPreview, setNewAvatarPreview] = useState(null);
-
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
+  const [googleAccount, setGoogleAccount] = useState(null);
 
   const navigate = useNavigate();
 
@@ -33,8 +34,6 @@ const Settings = () => {
           setUsername(data.username || "");
           setEmail(data.email || "");
           setPhoneNumber(data.phone_number || "");
-
-          // If the server returns the avatar as base64 or URL, save it
           if (data.avatar_base64) {
             setOldAvatarPreview(`data:image/png;base64,${data.avatar_base64}`);
           } else if (data.avatar_url) {
@@ -50,6 +49,34 @@ const Settings = () => {
     };
 
     fetchUserData();
+  }, []);
+
+  // Fetch linked Google account via endpoint api/accounts/google/get/
+  useEffect(() => {
+    const fetchGoogleAccount = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const response = await fetch(`${API_URL}/api/accounts/google/get/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          // The server is expected to return an object like { google_id: "..." }
+          if (data.google_id) {
+            setGoogleAccount(data.google_id);
+          } else {
+            setGoogleAccount(null);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching linked Google account", err);
+      }
+    };
+
+    fetchGoogleAccount();
   }, []);
 
   // Create preview for the new file
@@ -112,7 +139,7 @@ const Settings = () => {
           setAvatar(null);
           setNewAvatarPreview(null);
         }
-        // Reload the page
+        // Reload the page or update data
         window.location.reload();
       } else {
         const data = await response.json();
@@ -123,7 +150,88 @@ const Settings = () => {
     }
   };
 
-  // Display either the new avatar (if selected), or the current one
+  // Function to obtain Google User ID and link account
+  const handleGoogleId = () => {
+    if (!CLIENT_ID) {
+      setError("Missing client_id. Please check the REACT_APP_CLIENT_ID variable in the .env file.");
+      return;
+    }
+    if (!window.google) {
+      setError("Google API not loaded");
+      return;
+    }
+    const client = window.google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: "https://www.googleapis.com/auth/userinfo.profile",
+      callback: (response) => {
+        if (response.error) {
+          setError("Google authorization error");
+        } else {
+          fetchGoogleUserId(response.access_token);
+        }
+      },
+    });
+    client.requestAccessToken();
+  };
+
+  // Request to Google API to fetch data and link account via POST
+  const fetchGoogleUserId = async (accessToken) => {
+    try {
+      const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const googleId = data.sub;
+        console.log("Google User ID:", googleId);
+        const backendToken = localStorage.getItem("token");
+        const linkResponse = await fetch(`${API_URL}/api/accounts/google/link/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${backendToken}`,
+          },
+          body: JSON.stringify({ google_id: googleId }),
+        });
+        if (linkResponse.ok) {
+          setMessage("Google account linked successfully.");
+          setGoogleAccount(googleId);
+        } else {
+          const errData = await linkResponse.json();
+          setError(errData);
+        }
+      } else {
+        setError("Failed to fetch Google user data");
+      }
+    } catch (error) {
+      setError("Error fetching Google user data");
+    }
+  };
+
+  // Function to unlink Google account via DELETE request
+  const handleUnlink = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch(`${API_URL}/api/accounts/google/unlink/`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      });
+      if (response.ok) {
+        setMessage("Google account unlinked successfully.");
+        setGoogleAccount(null);
+      } else {
+        const errData = await response.json();
+        setError(errData);
+      }
+    } catch (error) {
+      setError("Error unlinking Google account");
+    }
+  };
+
   const displayedAvatar = newAvatarPreview || oldAvatarPreview;
 
   return (
@@ -170,11 +278,7 @@ const Settings = () => {
         </div>
         <div>
           <label>Avatar: </label>
-          <input
-            type="file"
-            onChange={handleAvatarChange}
-            accept="image/*"
-          />
+          <input type="file" onChange={handleAvatarChange} accept="image/*" />
         </div>
         {displayedAvatar && (
           <div style={{ margin: "10px 0" }}>
@@ -192,6 +296,23 @@ const Settings = () => {
         )}
         <button type="submit">Update</button>
       </form>
+      {/* Block for managing linked Google account */}
+      <div style={{ marginTop: "20px" }}>
+        {googleAccount ? (
+          <>
+            <div style={{ marginBottom: "10px", color: "blue" }}>
+              Linked Google account: {googleAccount}
+            </div>
+            <button type="button" onClick={handleUnlink}>
+              Unlink account
+            </button>
+          </>
+        ) : (
+          <button type="button" onClick={handleGoogleId}>
+            Obtain and send Google User ID
+          </button>
+        )}
+      </div>
     </div>
   );
 };

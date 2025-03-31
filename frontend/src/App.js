@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Home from "./Pages/Home";
 import PageNotFound from "./Pages/PageNotFound";
@@ -10,22 +11,35 @@ import ChatMessages from "./Pages/ChatMessages";
 import PostsCreate from "./Pages/PostsCreate";
 
 function App() {
-    return (
-        <>
-           <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/auth" element={<AuthForm />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/profile" element={<ProfileSearch />} />
-              <Route path="/profile/:id" element={<Profile />} />
-              <Route path="/chats" element={<Chats />} />
-              <Route path="/chats/:chatId" element={<ChatMessages />} />
-              <Route path="/post/create" element={<PostsCreate />} />
+  useEffect(() => {
+    const initGapi = () => {
+      if (window.gapi) {
+        window.gapi.load("auth2", () => {
+          window.gapi.auth2.init({
+            client_id: process.env.REACT_APP_CLIENT_ID
+          });
+        });
+      }
+    };
 
-              <Route path="*" element={<PageNotFound />} />
-           </Routes>
-        </>
-     );
+    initGapi();
+  }, []);
+
+  return (
+    <>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/auth" element={<AuthForm />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/profile" element={<ProfileSearch />} />
+        <Route path="/profile/:id" element={<Profile />} />
+        <Route path="/chats" element={<Chats />} />
+        <Route path="/chats/:chatId" element={<ChatMessages />} />
+        <Route path="/post/create" element={<PostsCreate />} />
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+    </>
+  );
 }
 
 export default App;
