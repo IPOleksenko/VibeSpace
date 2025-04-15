@@ -8,19 +8,13 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 
-# Product identifiers
-ONE_TIME_PAYMENT_PRODUCT = settings.ONE_TIME_PAYMENT_PRODUCT
-ONE_WEEK_SUBSCRIPTION_PRODUCT = settings.ONE_WEEK_SUBSCRIPTION_PRODUCT
-ONE_MONTH_SUBSCRIPTION_PRODUCT = settings.ONE_MONTH_SUBSCRIPTION_PRODUCT
+# Direct price identifiers
+ONE_TIME_PAYMENT_PRICE_ID = settings.ONE_TIME_PAYMENT_PRICE_ID
+ONE_WEEK_SUBSCRIPTION_PRICE_ID = settings.ONE_WEEK_SUBSCRIPTION_PRICE_ID
+ONE_MONTH_SUBSCRIPTION_PRICE_ID = settings.ONE_MONTH_SUBSCRIPTION_PRICE_ID
 
 WEBHOOK_SECRET = settings.STRIPE_WEBHOOK_SECRET
 stripe.api_key = settings.STRIPE_SECRET_KEY
-
-def get_price_id_by_product(product_id):
-    prices = stripe.Price.list(product=product_id, active=True, limit=1)
-    if prices.data:
-        return prices.data[0].id
-    return None
 
 @method_decorator(csrf_exempt, name='dispatch')
 class CheckoutSessionView(View):
@@ -35,20 +29,16 @@ class CheckoutSessionView(View):
 
         option = data.get("option")
         if option == "one_time":
-            product_id = ONE_TIME_PAYMENT_PRODUCT
+            price_id = ONE_TIME_PAYMENT_PRICE_ID
             mode = "payment"
         elif option == "one_week":
-            product_id = ONE_WEEK_SUBSCRIPTION_PRODUCT
+            price_id = ONE_WEEK_SUBSCRIPTION_PRICE_ID
             mode = "subscription"
         elif option == "one_month":
-            product_id = ONE_MONTH_SUBSCRIPTION_PRODUCT
+            price_id = ONE_MONTH_SUBSCRIPTION_PRICE_ID
             mode = "subscription"
         else:
             return JsonResponse({"error": "Invalid option"}, status=400)
-
-        price_id = get_price_id_by_product(product_id)
-        if not price_id:
-            return JsonResponse({"error": "No active price found for this product"}, status=500)
 
         try:
             session = stripe.checkout.Session.create(
@@ -61,7 +51,6 @@ class CheckoutSessionView(View):
             return JsonResponse({"error": str(e)}, status=500)
 
         return JsonResponse({"url": session.url})
-
 
 @method_decorator(csrf_exempt, name='dispatch')
 class StripeWebhookView(View):
