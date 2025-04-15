@@ -68,6 +68,9 @@ const Menu = () => {
               My Profile
             </button>
           )}
+            <button className="menu-item" onClick={() => handleNavigation(`Payment`)}>
+              Payment
+            </button>
           <button className="menu-item" onClick={() => handleNavigation("Settings")}>
             Settings
           </button>

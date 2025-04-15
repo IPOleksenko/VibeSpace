@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'chats',
     'chat_messages',
     'posts',
+    'payment',
     'AWS.S3',
 ]
 
@@ -117,6 +118,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+FRONTEND_URL = os.getenv("FRONTEND_URL")
+
 # Specify the default storage
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
@@ -145,3 +148,11 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+# Stripe Settings
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
+
+ONE_TIME_PAYMENT_PRODUCT = os.getenv("ONE_TIME_PAYMENT_PRODUCT")
+ONE_WEEK_SUBSCRIPTION_PRODUCT = os.getenv("ONE_WEEK_SUBSCRIPTION_PRODUCT")
+ONE_MONTH_SUBSCRIPTION_PRODUCT = os.getenv("ONE_MONTH_SUBSCRIPTION_PRODUCT")

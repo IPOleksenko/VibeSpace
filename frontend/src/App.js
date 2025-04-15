@@ -9,6 +9,7 @@ import Profile from "./Pages/Profile";
 import Chats from "./Pages/Chats";
 import ChatMessages from "./Pages/ChatMessages";
 import PostsCreate from "./Pages/PostsCreate";
+import Payment from "./Pages/Payment";
 
 function App() {
   useEffect(() => {
@@ -36,6 +37,7 @@ function App() {
         <Route path="/chats" element={<Chats />} />
         <Route path="/chats/:chatId" element={<ChatMessages />} />
         <Route path="/post/create" element={<PostsCreate />} />
+        <Route path="/payment" element={<Payment />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </>
