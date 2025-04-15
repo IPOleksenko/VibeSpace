@@ -30,6 +30,20 @@ Run database migrations using:
 py migrate.py
 ```
 
+### 🔐 Create Superuser
+
+To automatically create a Django superuser named `admin`, run the following script after applying migrations:
+
+```sh
+py create_superuser.py
+```
+
+- 👤 Username: `admin`  
+- 📧 Email: `admin@gmail.com`  
+- 🔑 Password: `admin`
+
+The script checks if the superuser already exists and creates it only if necessary.
+
 ### 🚀 Start the Project
 To start the backend server, execute:
 

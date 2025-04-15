@@ -20,8 +20,8 @@ daphne = "*"
 python-magic-bin = "*"
 social-auth-app-django = "*"
 requests = "*"
-nodeenv = "*"
 stripe = "*"
+nodeenv = "*"
 
 [dev-packages]
 
