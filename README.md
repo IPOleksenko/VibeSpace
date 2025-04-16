@@ -14,9 +14,11 @@
 Ensure Redis is running on your system and configure the necessary settings in `backend/.env`. Make sure Redis is active before starting the project.
 
 ### 🔧 Fill Environment Files
+
 Ensure that all required environment variables are present in both `backend/.env` and `frontend/.env` files before proceeding.
 
 ### 📦 Install Dependencies
+
 To install all necessary dependencies in a virtual environment, run:
 
 ```sh
@@ -24,6 +26,7 @@ py install.py
 ```
 
 ### 🔄 Migrate Database
+
 Run database migrations using:
 
 ```sh
@@ -32,19 +35,29 @@ py migrate.py
 
 ### 🔐 Create Superuser
 
-To automatically create a Django superuser named `admin`, run the following script after applying migrations:
+To automatically create a Django superuser, run the following script after applying migrations:
 
 ```sh
 py create_superuser.py
 ```
 
+This will create a superuser with:
+
 - 👤 Username: `admin`  
 - 📧 Email: `admin@gmail.com`  
 - 🔑 Password: `admin`
 
-The script checks if the superuser already exists and creates it only if necessary.
+You can also create a custom superuser by passing credentials in the format `username:password`:
+
+```sh
+py create_superuser.py username:password
+```
+
+This will use `username@gmail.com` as the email address.  
+The script checks if the user already exists and only creates the superuser if necessary.
 
 ### 🚀 Start the Project
+
 To start the backend server, execute:
 
 ```sh
@@ -52,6 +65,7 @@ py run.py
 ```
 
 ## 📁 Git Ignore Environment Files
+
 Prevent changes to sensitive environment files from being tracked:
 
 ```sh
@@ -60,6 +74,7 @@ git update-index --assume-unchanged frontend/.env
 ```
 
 ### 🔄 Restore Change Tracking
+
 If you need to track changes again:
 
 ```sh
