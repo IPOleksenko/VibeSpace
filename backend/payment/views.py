@@ -7,6 +7,13 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.response import Response
+from rest_framework import status
+
+from .models import StripePayment
 
 # Direct price identifiers
 ONE_TIME_PAYMENT_PRICE_ID = settings.ONE_TIME_PAYMENT_PRICE_ID
@@ -16,18 +23,16 @@ ONE_MONTH_SUBSCRIPTION_PRICE_ID = settings.ONE_MONTH_SUBSCRIPTION_PRICE_ID
 WEBHOOK_SECRET = settings.STRIPE_WEBHOOK_SECRET
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-@method_decorator(csrf_exempt, name='dispatch')
-class CheckoutSessionView(View):
+
+
+class CheckoutSessionView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
-    
-    def post(self, request, *args, **kwargs):
-        try:
-            data = json.loads(request.body)
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
 
+    def post(self, request, *args, **kwargs):
+        data = request.data
         option = data.get("option")
+
         if option == "one_time":
             price_id = ONE_TIME_PAYMENT_PRICE_ID
             mode = "payment"
@@ -38,7 +43,7 @@ class CheckoutSessionView(View):
             price_id = ONE_MONTH_SUBSCRIPTION_PRICE_ID
             mode = "subscription"
         else:
-            return JsonResponse({"error": "Invalid option"}, status=400)
+            return Response({"error": "Invalid option"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             session = stripe.checkout.Session.create(
@@ -47,37 +52,60 @@ class CheckoutSessionView(View):
                 line_items=[{"price": price_id, "quantity": 1}],
                 mode=mode,
             )
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
 
-        return JsonResponse({"url": session.url})
+            StripePayment.objects.create(
+                user=request.user,
+                stripe_checkout_session_id=session["id"],
+                payment_type=session["mode"],
+                amount=session["amount_total"] / 100,
+                currency=session["currency"],
+                status=session["payment_status"],
+                metadata=session.get("metadata", {}),
+            )
+
+            return Response({"url": session.url})
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class StripeWebhookView(View):
     def post(self, request, *args, **kwargs):
         payload = request.body
         sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
+
         try:
             event = stripe.Webhook.construct_event(
                 payload, sig_header, WEBHOOK_SECRET
             )
         except ValueError:
-            # Invalid JSON
             return HttpResponse(status=400)
         except stripe.error.SignatureVerificationError:
-            # Invalid signature
             return HttpResponse(status=400)
 
-        # Handling Stripe events
-        if event['type'] == 'payment_intent.succeeded':
-            payment_intent = event['data']['object']
-            # Logic for handling successful payment
-            print("💰 PaymentIntent was successful!", payment_intent)
+        if event['type'] == 'checkout.session.completed':
+            session = event['data']['object']
+            session_id = session.get("id")
+
+            try:
+                payment = StripePayment.objects.get(stripe_checkout_session_id=session_id)
+                
+                payment.status = session.get("payment_status", payment.status)
+                payment.amount = session.get("amount_total", payment.amount) / 100
+                payment.currency = session.get("currency", payment.currency)
+                payment.metadata = session.get("metadata", payment.metadata)
+                payment.save()
+
+                print("✅ Payment updated:", session_id)
+
+            except StripePayment.DoesNotExist:
+                print("❌ Payment with session ID not found:", session_id)
+                return HttpResponse(status=404)
+
         elif event['type'] == 'payment_method.attached':
-            payment_method = event['data']['object']
-            # Logic for attaching payment method
-            print("💳 PaymentMethod attached!", payment_method)
+            print("💳 PaymentMethod attached!")
+
         else:
-            print(f"Unhandled event type {event['type']}")
+            print(f"⚠️ Unhandled event type {event['type']}")
 
         return HttpResponse(status=200)

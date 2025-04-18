@@ -9,6 +9,8 @@ const Payment = () => {
   const navigate = useNavigate();
 
   const handlePayment = async () => {
+    const token = localStorage.getItem("token");
+    
     if (!selectedOption) {
       alert("Please select a payment option.");
       return;
@@ -21,6 +23,7 @@ const Payment = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
         },
         body: JSON.stringify({ option: selectedOption }),
       });
