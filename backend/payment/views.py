@@ -25,6 +25,11 @@ class CheckoutSessionView(APIView):
     authentication_classes = [TokenAuthentication]
 
     def post(self, request, *args, **kwargs):
+        # Prevent multiple active payments
+        if StripePayment.objects.filter(user=request.user, status__in=["paid", "active"]).exists():
+            return Response({"error": "You already have an active payment."}, status=status.HTTP_403_FORBIDDEN)
+
+        
         data = request.data
         option = data.get("option")
 
@@ -40,22 +45,15 @@ class CheckoutSessionView(APIView):
         else:
             return Response({"error": "Invalid option"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check for active payments
-        if StripePayment.objects.filter(user=request.user, status="paid").exists():
-            return Response({"error": "You already have an active payment."}, status=status.HTTP_403_FORBIDDEN)
-
         try:
             session = stripe.checkout.Session.create(
                 success_url=f"{settings.FRONTEND_URL}/success",
                 cancel_url=f"{settings.FRONTEND_URL}/cancel",
                 line_items=[{"price": price_id, "quantity": 1}],
                 mode=mode,
-                metadata={
-                    "user_id": str(request.user.id),
-                    "payment_type": mode
-                }
+                customer_email=request.user.email,
+                metadata={"user_id": str(request.user.id)}
             )
-
             return Response({"url": session.url})
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -67,19 +65,19 @@ class StripeWebhookView(View):
         sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
 
         try:
-            event = stripe.Webhook.construct_event(
-                payload, sig_header, WEBHOOK_SECRET
-            )
+            event = stripe.Webhook.construct_event(payload, sig_header, WEBHOOK_SECRET)
         except (ValueError, stripe.error.SignatureVerificationError):
             return HttpResponse(status=400)
 
         event_type = event['type']
-        data_object = event['data']['object']
+        data = event['data']['object']
 
         if event_type == 'checkout.session.completed':
-            session_id = data_object.get("id")
-            user_id = data_object.get("metadata", {}).get("user_id")
+            session_id = data.get("id")
+            user_id = data.get("metadata", {}).get("user_id")
+            mode = data.get("mode")
 
+            # Look up or create payment record
             try:
                 payment = StripePayment.objects.get(stripe_checkout_session_id=session_id)
                 is_new = False
@@ -89,65 +87,67 @@ class StripeWebhookView(View):
                 try:
                     user = User.objects.get(id=user_id)
                 except User.DoesNotExist:
-                    print("❌ User not found for ID:", user_id)
                     return HttpResponse(status=404)
-
-                payment = StripePayment(
-                    user=user,
-                    stripe_checkout_session_id=session_id,
-                    payment_type=data_object.get("mode"),
-                )
+                payment = StripePayment(user=user, stripe_checkout_session_id=session_id)
                 is_new = True
 
-            payment.status = data_object.get("payment_status", payment.status)
-            payment.amount = data_object.get("amount_total", 0) / 100
-            payment.currency = data_object.get("currency", payment.currency)
-            payment.metadata = data_object.get("metadata", payment.metadata)
-            payment.customer_email = data_object.get("customer_email")
-            payment.customer_name = data_object.get("customer_details", {}).get("name")
-            payment.payment_method = data_object.get("payment_method")
-            payment.stripe_subscription_id = data_object.get("subscription")
+            # Basic fields
+            payment.payment_type = mode
+            payment.status = data.get("payment_status", payment.status)
+            payment.amount = data.get("amount_total", 0) / 100
+            payment.currency = data.get("currency", payment.currency)
+            payment.metadata = data.get("metadata", payment.metadata)
+            payment.customer_email = data.get("customer_details", {}).get("email")
+            payment.customer_name = data.get("customer_details", {}).get("name")
 
-            # Get charge ID
-            payment_intent_id = data_object.get("payment_intent")
-            if payment_intent_id:
+            # Record intent and charge
+            intent_id = data.get("payment_intent")
+            payment.stripe_payment_intent_id = intent_id
+            if intent_id:
                 try:
-                    intent = stripe.PaymentIntent.retrieve(payment_intent_id)
-                    charges = intent.get("charges", {}).get("data", [])
+                    intent = stripe.PaymentIntent.retrieve(intent_id)
+                    # Save payment method from intent
+                    payment.payment_method = intent.payment_method
+                    charges = intent.charges.data
                     if charges:
-                        payment.stripe_charge_id = charges[0].get("id")
+                        payment.stripe_charge_id = charges[0].id
                 except Exception as e:
-                    print("⚠️ Failed to retrieve PaymentIntent:", e)
+                    print("⚠️ Failed retrieving PaymentIntent:", e)
+
+            # Subscription ID if any
+            payment.stripe_subscription_id = data.get("subscription")
 
             payment.save()
-            print("✅ Payment created" if is_new else "✅ Payment updated:", session_id)
+            print("✅ New payment created" if is_new else "✅ Payment updated", session_id)
 
         elif event_type == 'customer.subscription.updated':
-            subscription_id = data_object.get("id")
-            status = data_object.get("status")
-            current_period_end = data_object.get("current_period_end")
-
-            StripePayment.objects.filter(stripe_subscription_id=subscription_id).update(
-                status=status,
-                metadata={"current_period_end": current_period_end}
-            )
-            print(f"🔄 Subscription updated: {subscription_id}, status: {status}")
+            payment_intent_id = data.get("latest_invoice", {}).get("payment_intent")
+            if payment_intent_id:
+                StripePayment.objects.filter(stripe_payment_intent_id=payment_intent_id).update(
+                    status=data.get("status"),
+                    metadata={"current_period_end": data.get("current_period_end")}
+                )
+                print(f"🔄 PaymentIntent {payment_intent_id} updated to {data.get('status')}")
+            else:
+                print("⚠️ PaymentIntent ID not found in subscription.updated event.")
 
         elif event_type == 'invoice.payment_failed':
-            subscription_id = data_object.get("subscription")
+            payment_intent_id = data.get("payment_intent")
+            if payment_intent_id:
+                StripePayment.objects.filter(stripe_payment_intent_id=payment_intent_id).update(status="payment_failed")
+                print(f"❌ Payment failed for PaymentIntent {payment_intent_id}")
+            else:
+                print("⚠️ PaymentIntent ID not found in payment_failed event.")
 
-            StripePayment.objects.filter(stripe_subscription_id=subscription_id).update(
-                status="payment_failed"
-            )
-            print(f"❌ Payment failed for subscription: {subscription_id}")
-
-            try:
-                stripe.Subscription.delete(subscription_id)
-                print(f"🗑️ Subscription {subscription_id} cancelled due to failed payment.")
-            except Exception as e:
-                print(f"⚠️ Failed to cancel subscription {subscription_id}: {e}")
+            sub_id = data.get("subscription")
+            if sub_id:
+                try:
+                    stripe.Subscription.delete(sub_id)
+                    print(f"🗑️ Subscription {sub_id} cancelled.")
+                except Exception as e:
+                    print("⚠️ Failed cancelling subscription:", e)
 
         else:
-            print(f"⚠️ Unhandled event type {event_type}")
+            print(f"⚠️ Unhandled event type: {event_type}")
 
         return HttpResponse(status=200)
