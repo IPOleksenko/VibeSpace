@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../css/Profile.css";
+import crown from "../crown.svg";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
-// New component for switching media files within a single post
 const MediaSlider = ({ media, renderMediaItem }) => {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
@@ -44,6 +44,7 @@ const Profile = () => {
   const [currentUserLoading, setCurrentUserLoading] = useState(true);
   const [error, setError] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [crownVisible, setCrownVisible] = useState(false);
 
   // Fetching the viewed profile data
   useEffect(() => {
@@ -286,6 +287,30 @@ const Profile = () => {
     }
   };
 
+  // Fetch payment status
+  useEffect(() => {
+    const fetchPaymentStatus = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const response = await fetch(`${API_URL}/api/payment/status/${id}/`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (response.ok && data.has_subscription === true) {
+          setCrownVisible(true);
+        }
+      } catch (err) {
+        console.error("Error fetching payment status:", err);
+      }
+    };
+
+    fetchPaymentStatus();
+  }, [id]);
+
   // Determine if the viewed profile belongs to the current user
   const isOwnProfile =
     currentUser && user && parseInt(currentUser.id, 10) === parseInt(user.id, 10);
@@ -302,7 +327,9 @@ const Profile = () => {
     <div className="profile-page-container">
       <h2 className="profile-username">
         {user.username} (ID: {user.id})
+        {crownVisible && <img src={crown} alt="crown" className="crown" />}
       </h2>
+
       <div className="profile-details">
         {user.avatar_base64 && (
           <img

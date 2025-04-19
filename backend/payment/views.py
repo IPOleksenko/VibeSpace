@@ -4,6 +4,8 @@ from django.http import HttpResponse
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.views import APIView
@@ -151,3 +153,20 @@ class StripeWebhookView(View):
             print(f"⚠️ Unhandled event type: {event_type}")
 
         return HttpResponse(status=200)
+
+class SubscriptionStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request, user_id, *args, **kwargs):
+        user = get_object_or_404(get_user_model(), id=user_id)
+        
+        subscription = StripePayment.objects.filter(
+            user=user,
+            status__in=["paid", "active"]
+        ).exists()
+
+        if subscription:
+            return Response({"has_subscription": True})
+        else:
+            return Response({"has_subscription": False})
