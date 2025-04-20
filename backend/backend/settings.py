@@ -1,3 +1,4 @@
+import stripe
 from pathlib import Path
 from dotenv import load_dotenv
 import os
@@ -156,3 +157,5 @@ STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 ONE_TIME_PAYMENT_PRICE_ID = os.getenv("ONE_TIME_PAYMENT_PRICE_ID")
 ONE_WEEK_SUBSCRIPTION_PRICE_ID = os.getenv("ONE_WEEK_SUBSCRIPTION_PRICE_ID")
 ONE_MONTH_SUBSCRIPTION_PRICE_ID = os.getenv("ONE_MONTH_SUBSCRIPTION_PRICE_ID")
+
+stripe.api_key = STRIPE_SECRET_KEY
