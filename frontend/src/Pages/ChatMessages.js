@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import "../css/ChatMessages.css";
 
 const API_URL = process.env.REACT_APP_API_URL;
+const WS_URL = process.env.REACT_APP_WS_URL;
 const BATCH_SIZE = 20;
 
 const ChatMessages = () => {
@@ -84,7 +85,7 @@ const ChatMessages = () => {
     fetchMessages();
 
     // Connect to WebSocket to receive new messages
-    const socket = new WebSocket(`ws://localhost:8001/ws/chat/${chatId}/`);
+    const socket = new WebSocket(`${WS_URL}/ws/chat/${chatId}/`);
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === "message") {
