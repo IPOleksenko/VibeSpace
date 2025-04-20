@@ -69,3 +69,55 @@ class SubscriptionStatusView(APIView):
             return Response({"has_subscription": True})
         else:
             return Response({"has_subscription": False})
+
+class CancelSubscriptionView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+
+        # Get all active subscriptions and payments for the user
+        subscriptions = StripePayment.objects.filter(
+            user=user,
+            status__in=["paid", "active"]
+        )
+
+        if not subscriptions.exists():
+            return Response({"message": "No active subscriptions."}, status=status.HTTP_404_NOT_FOUND)
+
+        canceled = []
+        errors = []
+
+        for subscription in subscriptions:
+            if subscription.payment_type == "payment":
+                # If the subscription is a one-time payment, add an error to the list but don't interrupt the loop
+                errors.append(f"Subscription with payment type 'payment' (ID: {subscription.id}) cannot be canceled.")
+                continue  # Move to the next subscription
+
+            try:
+                # Cancel the subscription in Stripe
+                stripe.Subscription.modify(
+                    subscription.stripe_subscription_id,
+                    cancel_at_period_end=True
+                )
+                # Update the subscription status in our database
+                subscription.status = "canceled"
+                subscription.save()
+                canceled.append(subscription.id)
+
+            except stripe.error.StripeError as e:
+                # If an error occurs while canceling, add it to the error list
+                errors.append(f"Failed to cancel subscription {subscription.id}: {str(e)}")
+
+        if canceled:
+            return Response(
+                {"message": f"Subscriptions {canceled} successfully canceled."},
+                status=status.HTTP_200_OK
+            )
+        else:
+            # If no subscriptions were successfully canceled, return an error
+            return Response(
+                {"message": "Failed to cancel subscriptions. Errors: " + " | ".join(errors)},
+                status=status.HTTP_400_BAD_REQUEST
+            )

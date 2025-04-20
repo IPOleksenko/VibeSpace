@@ -7,6 +7,7 @@ const API_URL = process.env.REACT_APP_API_URL;
 const Payment = () => {
   const [selectedOption, setSelectedOption] = useState("");
   const [loading, setLoading] = useState(false);  
+  const [cancelLoading, setCancelLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,6 +54,35 @@ const Payment = () => {
     }
   };
 
+  const handleCancelSubscription = async () => {
+    const token = localStorage.getItem("token");
+  
+    setCancelLoading(true);
+  
+    try {
+      const response = await fetch(`${API_URL}/api/payment/stripe/cancel/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        }
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        alert(data.message);
+      } else {
+        alert("Error: " + (data.message || "Unknown error"));
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred while canceling the subscription.");
+    }
+  
+    setCancelLoading(false);
+  };  
+
   return (
     <div className="container">
       <h2>Choose a payment option</h2>
@@ -87,6 +117,12 @@ const Payment = () => {
       </div>
       <button onClick={handlePayment} disabled={loading} className="button">
         {loading ? "Redirecting..." : "Pay"}
+      </button>
+
+      <hr style={{ margin: "20px 0" }} />
+
+      <button onClick={handleCancelSubscription} disabled={cancelLoading} className="button cancel-button">
+        {cancelLoading ? "Cancelling..." : "Cancel Subscription"}
       </button>
     </div>
   );
