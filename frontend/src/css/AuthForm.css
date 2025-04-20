@@ -194,7 +194,6 @@ input:focus {
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* Avatar Upload Field Styles */
 .avatar-upload {
     display: flex;
     flex-direction: column;
@@ -218,7 +217,6 @@ input:focus {
     cursor: pointer;
 }
 
-/* Error Message Style */
 .error-message {
     color: red;
     font-size: 14px;
@@ -226,3 +224,107 @@ input:focus {
     text-shadow: 0 0 8px red, 0 0 16px red, 0 0 24px red;
 }
 
+body.dark {
+    background-color: #121212;
+    color: white;
+}
+
+.auth-container.dark {
+    background: rgba(30, 10, 40, 0.95);
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.8);
+}
+
+h2.dark {
+    color: #ff00ff;
+    text-shadow: 0 0 15px rgba(255, 0, 255, 1), 0 0 30px rgba(200, 0, 200, 0.9);
+}
+
+.input-group input.dark {
+    background: rgba(20, 10, 30, 0.8);
+    color: white;
+    box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+}
+
+.neon-button.dark {
+    background: #ff00ff;
+    color: white;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.8);
+}
+
+.neon-button.dark:hover {
+    background: #cc00cc;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 1);
+}
+
+.register.dark {
+    background: #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+}
+
+.register.dark:hover {
+    background: #00cccc;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 1);
+}
+
+.phone-group input.dark {
+    background: rgba(20, 10, 30, 0.8);
+    color: white;
+}
+
+.country-selector.dark {
+    background: rgba(20, 10, 30, 0.8);
+    color: white;
+}
+
+.country-selector.dark:hover {
+    background: rgba(30, 10, 50, 0.9);
+}
+
+.error-message.dark {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+    text-shadow: 0 0 8px red, 0 0 16px red, 0 0 24px red;
+}
+
+body {
+    background-color: #fff;
+    color: black;
+}
+
+.auth-container {
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.8);
+}
+
+h2 {
+    color: #ff00ff;
+    text-shadow: 0 0 15px rgba(255, 0, 255, 1), 0 0 30px rgba(200, 0, 200, 0.9);
+}
+
+.input-group input {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+}
+
+.neon-button {
+    background: #ff00ff;
+    color: white;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.8);
+}
+
+.neon-button:hover {
+    background: #cc00cc;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 1);
+}
+
+.register {
+    background: #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+}
+
+.register:hover {
+    background: #00cccc;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 1);
+}

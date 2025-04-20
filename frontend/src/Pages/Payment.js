@@ -1,16 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import '../css/Payment.css';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 const Payment = () => {
   const [selectedOption, setSelectedOption] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);  
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      document.body.classList.add(savedTheme);
+    } else {
+      document.body.classList.add("light");
+    }
+  }, []);
 
   const handlePayment = async () => {
     const token = localStorage.getItem("token");
-    
+
     if (!selectedOption) {
       alert("Please select a payment option.");
       return;
@@ -44,74 +54,42 @@ const Payment = () => {
   };
 
   return (
-    <div style={styles.container}>
+    <div className="container">
       <h2>Choose a payment option</h2>
-      <div style={styles.options}>
-        <label style={styles.option}>
+      <div className="options">
+        <label className="option">
+          <span className="option-text">One-Time Payment</span>
           <input
             type="radio"
             value="one_time"
             checked={selectedOption === "one_time"}
             onChange={() => setSelectedOption("one_time")}
           />
-          One-Time Payment
         </label>
-        <label style={styles.option}>
+        <label className="option">
+          <span className="option-text">1 Week Subscription</span>
           <input
             type="radio"
             value="one_week"
             checked={selectedOption === "one_week"}
             onChange={() => setSelectedOption("one_week")}
           />
-          1 Week Subscription
         </label>
-        <label style={styles.option}>
+        <label className="option">
+          <span className="option-text">1 Month Subscription</span>
           <input
             type="radio"
             value="one_month"
             checked={selectedOption === "one_month"}
             onChange={() => setSelectedOption("one_month")}
           />
-          1 Month Subscription
         </label>
       </div>
-      <button onClick={handlePayment} disabled={loading} style={styles.button}>
+      <button onClick={handlePayment} disabled={loading} className="button">
         {loading ? "Redirecting..." : "Pay"}
       </button>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    maxWidth: "400px",
-    margin: "50px auto",
-    padding: "20px",
-    textAlign: "center",
-    fontFamily: "Arial, sans-serif",
-    border: "1px solid #ccc",
-    borderRadius: "8px",
-    backgroundColor: "#f9f9f9",
-  },
-  options: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    margin: "20px 0",
-  },
-  option: {
-    marginBottom: "10px",
-    fontSize: "16px",
-  },
-  button: {
-    padding: "10px 20px",
-    fontSize: "16px",
-    cursor: "pointer",
-    backgroundColor: "#6772e5",
-    color: "#fff",
-    border: "none",
-    borderRadius: "4px",
-  },
 };
 
 export default Payment;
