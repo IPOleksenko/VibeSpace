@@ -3,7 +3,7 @@ import os
 import subprocess
 import sys
 
-def load_env(dotenv_paths=['frontend.env', 'backend.env']):
+def load_env(dotenv_paths=['env/frontend.env', 'env/backend.env']):
     """
     Loads environment variables from multiple .env files.
     """

@@ -9,13 +9,13 @@
 
 ## 📌 Setup Instructions
 
-### ⚡ Enable Redis and Configure `backend.env`.
+### ⚡ Enable Redis and Configure `env/backend.env`.
 
-Ensure Redis is running on your system and configure the necessary settings in `backend.env`.
+Ensure Redis is running on your system and configure the necessary settings in `env/backend.env`.
 
 ### 🔧 Fill Environment Files
 
-Ensure that all required environment variables are present in both `backend.env` and `frontend.env` files before proceeding.
+Ensure that all required environment variables are present in both `env/backend.env` and `env/frontend.env` files before proceeding.
 
 ### 📦 Install Dependencies
 
@@ -69,8 +69,8 @@ py run.py
 Prevent changes to sensitive environment files from being tracked:
 
 ```sh
-git update-index --assume-unchanged backend.env
-git update-index --assume-unchanged frontend.env
+git update-index --assume-unchanged env/backend.env
+git update-index --assume-unchanged env/frontend.env
 ```
 
 ### 🔄 Restore Change Tracking
@@ -78,8 +78,8 @@ git update-index --assume-unchanged frontend.env
 If you need to track changes again:
 
 ```sh
-git update-index --no-assume-unchanged backend.env
-git update-index --no-assume-unchanged frontend.env
+git update-index --no-assume-unchanged env/backend.env
+git update-index --no-assume-unchanged env/frontend.env
 ```
 
 ## ✍️ Authors

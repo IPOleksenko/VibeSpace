@@ -1,4 +1,3 @@
 Pipfile.lock
 
-backend.env
-frontend.env
+env/*
