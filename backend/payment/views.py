@@ -8,51 +8,49 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from .models import StripePayment
-
-# Direct price identifiers
-ONE_TIME_PAYMENT_PRICE_ID = settings.ONE_TIME_PAYMENT_PRICE_ID
-ONE_WEEK_SUBSCRIPTION_PRICE_ID = settings.ONE_WEEK_SUBSCRIPTION_PRICE_ID
-ONE_MONTH_SUBSCRIPTION_PRICE_ID = settings.ONE_MONTH_SUBSCRIPTION_PRICE_ID
+from .models import StripePayment, Product
+from .serializers import ProductSerializer
 
 class CheckoutSessionView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
     def post(self, request, *args, **kwargs):
-        # Prevent multiple active payments
         if StripePayment.objects.filter(user=request.user, status__in=["paid", "active"]).exists():
             return Response({"error": "You already have an active payment."}, status=status.HTTP_403_FORBIDDEN)
 
-        
-        data = request.data
-        option = data.get("option")
+        product_id = request.data.get("product_id")
 
-        if option == "one_time":
-            price_id = ONE_TIME_PAYMENT_PRICE_ID
-            mode = "payment"
-        elif option == "one_week":
-            price_id = ONE_WEEK_SUBSCRIPTION_PRICE_ID
-            mode = "subscription"
-        elif option == "one_month":
-            price_id = ONE_MONTH_SUBSCRIPTION_PRICE_ID
-            mode = "subscription"
-        else:
-            return Response({"error": "Invalid option"}, status=status.HTTP_400_BAD_REQUEST)
+        if not product_id:
+            return Response({"error": "Product ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({"error": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        mode = "payment" if product.type == "one_time" else "subscription"
 
         try:
             session = stripe.checkout.Session.create(
                 success_url=f"{settings.FRONTEND_URL}/success",
                 cancel_url=f"{settings.FRONTEND_URL}/cancel",
-                line_items=[{"price": price_id, "quantity": 1}],
+                line_items=[{
+                    "price": product.stripe_price_id,
+                    "quantity": 1
+                }],
                 mode=mode,
                 customer_email=request.user.email,
-                metadata={"user_id": str(request.user.id)}
+                metadata={
+                    "user_id": str(request.user.id),
+                    "product_id": str(product.id),
+                    "product_type": product.type
+                }
             )
             return Response({"url": session.url})
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+        
 class SubscriptionStatusView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
@@ -121,3 +119,21 @@ class CancelSubscriptionView(APIView):
                 {"message": "Failed to cancel subscriptions. Errors: " + " | ".join(errors)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+class ProductListView(APIView):
+    def get(self, request, *args, **kwargs):
+        try:
+            # Retrieve all products
+            products = Product.objects.all()
+
+            # If products exist, return their serialized data
+            if products.exists():
+                serializer = ProductSerializer(products, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                # If no products are available, return 404 with a message
+                return Response({"message": "No products available"}, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            # In case of a server error
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

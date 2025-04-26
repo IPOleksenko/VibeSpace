@@ -1,7 +1,56 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 
 User = get_user_model()
+
+class Product(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100, verbose_name="Name")
+    description = models.TextField(verbose_name="Description")
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Price", validators=[MinValueValidator(0)])
+    type = models.CharField(
+        max_length=20,
+        choices=[
+            ('one_time', 'One Time'),
+            ('subscription', 'Subscription')
+        ],
+        default='one_time',
+        verbose_name="Type",
+        help_text="Product type: one-time or subscription"
+    )
+    subscription_period = models.DurationField(
+    blank=True, null=True,
+    verbose_name="Subscription Period",
+    help_text="Duration of subscription (e.g., 30 days). Only applicable for subscriptions."
+    )
+    is_active = models.BooleanField(default=True, verbose_name="Is Active")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date Added")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Date Updated")
+    stripe_product_id = models.CharField(
+        max_length=100,
+        blank=True, null=True,
+        editable=False,
+        verbose_name="Stripe Product ID"
+    )
+    stripe_price_id = models.CharField(
+        max_length=100,
+        blank=True, null=True,
+        editable=False,
+        verbose_name="Stripe Price ID"
+    )
+
+    def clean(self):
+        if self.type == 'one_time' and self.subscription_period:
+            raise ValidationError("One-time products should not have a subscription period.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return self.name
 
 class StripePayment(models.Model):
     id = models.AutoField(primary_key=True)
