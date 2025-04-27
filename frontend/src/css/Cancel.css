@@ -1,0 +1,22 @@
+.cancel-container {
+    text-align: center;
+    font-family: sans-serif;
+    color: #333;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .cancel-container.dark {
+    color: #eee;
+  }
+  
+  .cancel-container h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .cancel-container p {
+    font-size: 1.2rem;
+    margin: 0;
+  }
+  

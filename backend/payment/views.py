@@ -9,13 +9,16 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .models import StripePayment, Product
-from .serializers import ProductSerializer
+from .serializers import ProductSerializer, PaymentSerializer
 
 class CheckoutSessionView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
     def post(self, request, *args, **kwargs):
+        if StripePayment.objects.filter(user=request.user, status__in=["paid", "active"]).exists():
+            return Response({"error": "You already have an active payment."}, status=status.HTTP_403_FORBIDDEN)
+        
         product_id = request.data.get("product_id")
 
         if not product_id:
@@ -146,3 +149,19 @@ class ProductListView(APIView):
         except Exception as e:
             # In case of a server error
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class PaymentListView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+
+        payments = StripePayment.objects.filter(user=user).order_by('-created_at')
+
+        if not payments.exists():
+            return Response({"error": "No payments found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = PaymentSerializer(payments, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)

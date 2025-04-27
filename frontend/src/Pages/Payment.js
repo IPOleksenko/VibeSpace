@@ -143,6 +143,15 @@ const Payment = () => {
       <button onClick={handleCancelSubscription} disabled={cancelLoading} className="button cancel-button">
         {cancelLoading ? "Cancelling..." : "Cancel Subscription"}
       </button>
+
+      {/* Button to navigate to receipts page */}
+      <button
+        onClick={() => navigate("/success")}
+        className="button"
+        style={{ marginTop: "20px" }}
+      >
+        View Receipts
+      </button>
     </div>
   );
 };
