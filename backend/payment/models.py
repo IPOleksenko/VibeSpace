@@ -115,6 +115,16 @@ class StripePayment(models.Model):
         help_text="Additional payment data in JSON format"
     )
 
+    receipt_url = models.URLField(
+        max_length=500, blank=True, null=True,
+        help_text="URL to the Stripe receipt"
+    )
+
+    invoice_url = models.URLField(
+        blank=True, null=True,
+        help_text="URL to the Stripe invoice"
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

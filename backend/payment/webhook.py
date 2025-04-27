@@ -29,6 +29,10 @@ class StripeWebhookView(View):
             return self.handle_subscription_updated(data)
         elif event_type == 'customer.subscription.deleted':
             return self.handle_subscription_deleted(data)
+        elif event_type == 'invoice.created':
+            return self.handle_invoice_created(data)
+        elif event_type == 'charge.updated':
+            return self.handle_charge_updated(data)
         else:
             print(f"⚠️ Unhandled event type: {event_type}")
 
@@ -39,13 +43,13 @@ class StripeWebhookView(View):
         user_id = data.get("metadata", {}).get("user_id")
         mode = data.get("mode")
 
-        # Look up or create payment record
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+
         try:
             payment = StripePayment.objects.get(stripe_checkout_session_id=session_id)
             is_new = False
         except StripePayment.DoesNotExist:
-            from django.contrib.auth import get_user_model
-            User = get_user_model()
             try:
                 user = User.objects.get(id=user_id)
             except User.DoesNotExist:
@@ -53,7 +57,6 @@ class StripeWebhookView(View):
             payment = StripePayment(user=user, stripe_checkout_session_id=session_id)
             is_new = True
 
-        # Basic fields
         payment.payment_type = mode
         payment.status = data.get("payment_status", payment.status)
         payment.amount = data.get("amount_total", 0) / 100
@@ -62,13 +65,11 @@ class StripeWebhookView(View):
         payment.customer_email = data.get("customer_details", {}).get("email")
         payment.customer_name = data.get("customer_details", {}).get("name")
 
-        # Record intent and charge
         intent_id = data.get("payment_intent")
         payment.stripe_payment_intent_id = intent_id
         if intent_id:
             try:
                 intent = stripe.PaymentIntent.retrieve(intent_id)
-                # Save payment method from intent
                 payment.payment_method = intent.payment_method
                 charges = intent.charges.data
                 if charges:
@@ -100,7 +101,6 @@ class StripeWebhookView(View):
         
         return HttpResponse(status=200)
 
-
     def handle_subscription_deleted(self, data):
         stripe_subscription_id = data.get("id")
         
@@ -121,4 +121,54 @@ class StripeWebhookView(View):
         else:
             print("⚠️ Subscription ID not found in subscription.deleted event.")
         
+        return HttpResponse(status=200)
+
+    def handle_invoice_created(self, data):
+        subscription_id = data.get('subscription')
+        payment_intent_id = data.get('payment_intent')
+        invoice_url = data.get('hosted_invoice_url')
+
+        payment = None
+
+        if subscription_id:
+            try:
+                payment = StripePayment.objects.get(stripe_subscription_id=subscription_id)
+            except StripePayment.DoesNotExist:
+                print(f"⚠️ Payment with subscription ID {subscription_id} not found.")
+        elif payment_intent_id:
+            try:
+                payment = StripePayment.objects.get(stripe_payment_intent_id=payment_intent_id)
+            except StripePayment.DoesNotExist:
+                print(f"⚠️ Payment with PaymentIntent ID {payment_intent_id} not found.")
+        
+        if payment:
+            if invoice_url:
+                payment.invoice_url = invoice_url
+            if payment_intent_id:
+                payment.stripe_payment_intent_id = payment_intent_id
+            payment.save()
+            print(f"✅ Invoice created for payment ID {payment.id}.")
+        else:
+            print("⚠️ No payment found for the invoice.")
+
+        return HttpResponse(status=200)
+    
+    def handle_charge_updated(self, data):
+        payment_intent_id = data.get("payment_intent")
+        receipt_url = data.get("receipt_url")
+        charge_id = data.get("id")
+
+        if not payment_intent_id:
+            print("⚠️ No payment_intent in charge.updated")
+            return HttpResponse(status=200)
+
+        try:
+            payment = StripePayment.objects.get(stripe_payment_intent_id=payment_intent_id)
+            payment.stripe_charge_id = charge_id
+            payment.receipt_url = receipt_url
+            payment.save()
+            print(f"✅ Receipt URL updated for PaymentIntent {payment_intent_id}")
+        except StripePayment.DoesNotExist:
+            print(f"⚠️ No payment found for PaymentIntent {payment_intent_id}")
+
         return HttpResponse(status=200)

@@ -16,9 +16,6 @@ class CheckoutSessionView(APIView):
     authentication_classes = [TokenAuthentication]
 
     def post(self, request, *args, **kwargs):
-        if StripePayment.objects.filter(user=request.user, status__in=["paid", "active"]).exists():
-            return Response({"error": "You already have an active payment."}, status=status.HTTP_403_FORBIDDEN)
-
         product_id = request.data.get("product_id")
 
         if not product_id:
@@ -47,6 +44,18 @@ class CheckoutSessionView(APIView):
                     "product_type": product.type
                 }
             )
+
+            StripePayment.objects.create(
+                user=request.user,
+                stripe_checkout_session_id=session.id,
+                payment_type=product.type,
+                amount=product.price,
+                currency=session.currency,
+                status=session.status,
+                customer_email=request.user.email,
+                metadata=session.metadata
+            )
+
             return Response({"url": session.url})
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
